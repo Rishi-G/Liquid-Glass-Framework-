@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lovable Glass UI — Full Upgrade</title>
+
+  <!-- Tailwind CDN for utilities (layout/typography). Most glass styling is CSS below. -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* ---------------------------
+       Design tokens & background
+       --------------------------- */
+    :root{
+      --bg-deep-1: #071b30;
+      --bg-deep-2: #08263f;
+      --accent-1: #9fd7ef;
+      --accent-2: #5bb8e6;
+      --glass-blur: 26px;        /* main backdrop blur */
+      --glass-radius-xl: 22px;
+      --glass-border-light: rgba(255,255,255,0.52);
+      --glass-border-dark: rgba(0,0,0,0.18);
+      --glass-sheen: rgba(255,255,255,0.14);
+      --glass-inner-shadow: rgba(0,0,0,0.14);
+      --shadow-deep: 0 20px 60px rgba(4,8,20,0.45);
+      --muted: rgba(255,255,255,0.85);
+      --muted-2: rgba(255,255,255,0.65);
+      --z-base: 100;
+      --z-popup: 1100;
+      --z-tooltip: 1200;
+      --motion-fast: 150ms;
+      --motion-medium: 260ms;
+    }
+
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background-image:
+        radial-gradient(1000px 500px at 10% 20%, rgba(255,255,255,0.02), transparent 10%),
+        linear-gradient(180deg,var(--bg-deep-1), var(--bg-deep-2));
+      color: var(--muted);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ---------------------------
+       SVG Filter (displacement/refraction)
+       - light-weight; small displacement
+       --------------------------- */
+    /* defined inline in body as SVG element and referenced by filter: url(#glass-filter) */
+
+    /* ---------------------------
+       Liquid glass base
+       - this is the new apple-like surface
+       --------------------------- */
+    .liquid {
+      position: relative;
+      border-radius: var(--glass-radius-xl);
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.12);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.2) contrast(1.02);
+      backdrop-filter: blur(var(--glass-blur)) saturate(1.2) contrast(1.02);
+      box-shadow: var(--shadow-deep), inset 0 1px 0 rgba(255,255,255,0.06);
+      transition: transform var(--motion-medium) cubic-bezier(.2,.9,.3,1), box-shadow var(--motion-medium);
+      will-change: transform, box-shadow;
+    }
+
+    /* top sheen */
+    .liquid::before{
+      content:""; position:absolute; left:-20%; top:-60%; width:140%; height:70%;
+      background: linear-gradient(90deg, rgba(255,255,255,0.28), rgba(255,255,255,0.02));
+      transform: rotate(-6deg); filter: blur(14px); opacity:0.95; pointer-events:none;
+      mix-blend-mode: screen;
+    }
+    /* subtle inner bottom shadow */
+    .liquid::after{
+      content:""; position:absolute; inset:auto 6% -10% 6%; height:40%; background: radial-gradient(ellipse at center, rgba(0,0,0,0.12), transparent 55%); pointer-events:none;
+    }
+
+    /* edge highlight (thin glass border/reflection) */
+    .liquid-edge {
+      position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.42), inset 0 -8px 20px rgba(0,0,0,0.12);
+      mix-blend-mode: screen; opacity:.9;
+    }
+
+    /* optional refraction filter wrapper (apply to large surfaces) */
+    .liquid-refraction { filter: url(#glass-filter); }
+
+    /* clickable focus ring */
+    .focus-ring:focus { outline: none; box-shadow: 0 0 0 6px rgba(91,184,230,0.08); border-color: rgba(255,255,255,0.2); }
+
+    /* pill search styles */
+    .search-pill {
+      display:flex; align-items:center; gap:20px; padding: 18px 28px;
+      border-radius:9999px; height:86px;
+    }
+    .search-icon {
+      width:56px; height:56px; border-radius:9999px; display:grid; place-items:center;
+      background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02)); color:white; font-size:24px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 20px rgba(4,8,20,0.4);
+    }
+    .search-input {
+      flex:1; border:none; background:transparent; color: white; font-size:32px; font-weight:600;
+      padding:0; margin:0; outline:none;
+    }
+
+    /* filter circle */
+    .filter-circle {
+      width:96px; height:96px; border-radius:9999px; display:grid; place-items:center; color:white;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.12), rgba(255,255,255,0.02));
+      box-shadow: 0 10px 40px rgba(4,8,20,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    /* components small helpers */
+    .card { padding:18px; border-radius:14px; }
+    .btn { padding:.6rem 1rem; border-radius:12px; display:inline-flex; align-items:center; gap:.6rem; font-weight:600; }
+    .btn-primary { background: linear-gradient(90deg,var(--accent-1),var(--accent-2)); color:#042236; box-shadow: 0 10px 40px rgba(91,184,230,0.12); }
+    .btn-ghost { background:transparent; color:var(--muted-2); border:1px solid rgba(255,255,255,0.04); }
+
+    /* tables */
+    .lovable-table thead tr { background: rgba(255,255,255,0.02); }
+    .lovable-table td, .lovable-table th { padding:12px 14px; }
+
+    /* dropdown panel */
+    .dropdown-panel { position:absolute; right:0; top:100%; margin-top:12px; width:240px; border-radius:12px; padding:8px; transform-origin: top right; transition: opacity var(--motion-fast), transform var(--motion-fast); }
+    .dropdown-panel.hidden{ opacity:0; transform: translateY(-6px) scale(.995); pointer-events:none; }
+    .dropdown-panel.show{ opacity:1; transform: translateY(0) scale(1); pointer-events:auto; z-index: var(--z-popup); }
+
+    /* tooltip */
+    .tooltip { position:absolute; left:50%; transform:translateX(-50%) translateY(6px) scale(.98); padding:8px 12px; border-radius:10px; font-size:13px; transition: transform var(--motion-fast), opacity var(--motion-fast); opacity:0; pointer-events:none; z-index: var(--z-tooltip); background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); }
+    .tooltip.show { opacity:1; transform:translateX(-50%) translateY(0) scale(1); pointer-events:auto; }
+
+    /* modal */
+    .modal-backdrop { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background: rgba(4,8,20,0.6); z-index: calc(var(--z-popup) + 100); }
+    .modal-card { width:min(880px, 94%); border-radius:20px; overflow:hidden; }
+
+    /* toast root */
+    #toastRoot { position:fixed; right:20px; top:20px; display:flex; flex-direction:column; gap:10px; z-index: 2000; }
+
+    /* spinner */
+    .spinner { width:28px; height:28px; border-radius:9999px; border:3px solid rgba(255,255,255,0.12); border-top-color: var(--accent-1); animation: spin 900ms linear infinite; }
+    @keyframes spin{ to{ transform: rotate(360deg); } }
+
+    /* responsive smaller */
+    @media (max-width: 640px){
+      .search-input{ font-size:20px; } .search-pill{ height:64px; padding:12px 16px; }
+      .filter-circle { width:72px; height:72px; }
+    }
+
+    /* reduced motion */
+    @media (prefers-reduced-motion: reduce){ * { transition: none !important; animation: none !important; } }
+  </style>
+</head>
+<body class="antialiased">
+
+  <!-- SVG filters (hidden) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden>
+    <filter id="glass-filter" x="-20%" y="-20%" width="140%" height="140%">
+      <!-- light turbulence for subtle refraction -->
+      <feTurbulence baseFrequency="0.02" numOctaves="1" seed="3" result="t" />
+      <feDisplacementMap in="SourceGraphic" in2="t" scale="2" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </svg>
+
+  <!-- top header w search -->
+  <header class="px-8 py-8">
+    <div class="max-w-[1200px] mx-auto flex items-center gap-6">
+      <div class="liquid liquid-refraction search-pill w-full z-[var(--z-base)]">
+        <div class="liquid-edge"></div>
+        <div class="search-icon">🔍</div>
+        <input class="search-input" placeholder="Search Here" aria-label="Search" />
+        <div style="width:1px;height:56px;background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.06)); border-radius:2px"></div>
+        <button id="filterBtn" class="filter-circle" aria-label="Filter">⚙️</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- main content -->
+  <main class="max-w-[1200px] mx-auto px-8 pb-16">
+
+    <!-- NAVBAR -->
+    <nav class="liquid r-[12px] p-3 flex items-center justify-between mb-8" style="border-radius:14px">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-lg liquid center" style="display:grid;place-items:center">LG</div>
+        <div class="text-white font-semibold text-lg">Lovable</div>
+      </div>
+      <div class="flex items-center gap-3 relative">
+        <a class="liquid p-2 px-4 rounded-md btn-ghost focus-ring" href="#">Home</a>
+        <a class="liquid p-2 px-4 rounded-md btn-ghost" href="#">Features</a>
+        <a class="liquid p-2 px-4 rounded-md btn-ghost" href="#">Pricing</a>
+        <button id="navDropdownBtn" class="liquid p-2 px-4 rounded-md btn-ghost">More ▾</button>
+        <div id="navDropdown" class="dropdown-panel hidden liquid" style="right:0;">
+          <div class="liquid-edge" style="opacity:0.6"></div>
+          <a class="block py-2 px-3 rounded-md" href="#">About</a>
+          <a class="block py-2 px-3 rounded-md" href="#">Contact</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Grid of components -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Left: full-width demo area (2-column on lg) -->
+      <div class="lg:col-span-2 space-y-6">
+
+        <!-- Buttons & Badges -->
+        <div class="liquid card">
+          <div class="flex items-center justify-between">
+            <h3 class="text-white text-lg font-semibold">Buttons</h3>
+            <div class="flex gap-2 items-center">
+              <button class="btn btn-primary">Primary</button>
+              <button class="btn btn-ghost">Ghost</button>
+            </div>
+          </div>
+
+          <div class="mt-4 flex gap-3 items-center">
+            <span class="px-3 py-1 rounded-full liquid" style="background:linear-gradient(90deg,var(--accent-1),var(--accent-2)); color:#042236">Primary</span>
+            <span class="px-3 py-1 rounded-full liquid">Default</span>
+          </div>
+        </div>
+
+        <!-- Cards -->
+        <div class="liquid card">
+          <h3 class="text-white text-lg font-semibold">Cards</h3>
+          <div class="grid md:grid-cols-3 gap-4 mt-4">
+            <article class="liquid p-4">
+              <h4 class="font-semibold text-white">Card 1</h4>
+              <p class="text-[.95rem] muted">Short description for card 1.</p>
+              <div class="mt-3"><button class="btn btn-primary">Action</button></div>
+            </article>
+            <article class="liquid p-4">
+              <h4 class="font-semibold text-white">Card 2</h4>
+              <p class="muted">Short description for card 2.</p>
+              <div class="mt-3"><button class="btn">Action</button></div>
+            </article>
+            <article class="liquid p-4">
+              <h4 class="font-semibold text-white">Card 3</h4>
+              <p class="muted">Short description for card 3.</p>
+              <div class="mt-3"><button class="btn">Action</button></div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Forms -->
+        <div class="liquid card">
+          <h3 class="text-white font-semibold">Form</h3>
+          <form id="demoForm" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-white/80 mb-2">Email</label>
+              <input id="email" class="w-full lovable-input p-3 liquid" type="email" placeholder="name@example.com" />
+            </div>
+            <div>
+              <label class="block text-white/80 mb-2">Password</label>
+              <input id="password" class="w-full lovable-input p-3 liquid" type="password" placeholder="••••••" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-white/80 mb-2">Message</label>
+              <textarea id="message" rows="3" class="w-full lovable-input p-3 liquid"></textarea>
+            </div>
+            <div class="md:col-span-2 flex items-center gap-3">
+              <button type="button" id="formSubmit" class="btn btn-primary">Submit</button>
+              <button type="reset" class="btn">Reset</button>
+              <div id="formStatus" class="text-sm text-green-400 hidden">Submitted</div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Table -->
+        <div class="liquid card overflow-x-auto">
+          <h3 class="text-white font-semibold">Table</h3>
+          <table class="lovable-table w-full mt-3">
+            <thead>
+              <tr>
+                <th class="muted">#</th>
+                <th class="muted">Name</th>
+                <th class="muted">Role</th>
+                <th class="muted">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td><td>Rudrka</td><td>Creator</td><td style="color:var(--accent-2)">Active</td>
+              </tr>
+              <tr>
+                <td>2</td><td>Alex</td><td>Designer</td><td style="color:var(--glass-border-dark)">Offline</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Accordion & Tabs -->
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="liquid card">
+            <h3 class="text-white font-semibold">Accordion</h3>
+            <div class="mt-3 space-y-2">
+              <div class="liquid p-2">
+                <button class="w-full text-left p-3 font-semibold accordion-toggle" data-target="#accA">What is this?</button>
+                <div id="accA" class="accordion-panel hidden p-3">This is Lovable glass UI with upgraded refraction and reflections.</div>
+              </div>
+              <div class="liquid p-2">
+                <button class="w-full text-left p-3 font-semibold accordion-toggle" data-target="#accB">Design</button>
+                <div id="accB" class="accordion-panel hidden p-3">Design focuses on depth, clarity and motion like iOS.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="liquid card">
+            <h3 class="text-white font-semibold">Tabs</h3>
+            <div class="lovable-tabs flex gap-2 border-b border-white/6">
+              <button class="px-3 py-2 active tab-btn" data-target="#tOverview">Overview</button>
+              <button class="px-3 py-2 tab-btn" data-target="#tSpecs">Specs</button>
+            </div>
+            <div id="tOverview" class="mt-3">Overview content.</div>
+            <div id="tSpecs" class="mt-3 hidden">Specs content.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: utilities, pagination, breadcrumbs, small actions -->
+      <aside class="space-y-6">
+        <div class="liquid card">
+          <h4 class="text-white font-semibold">Quick Actions</h4>
+          <div class="mt-3 flex flex-col gap-3">
+            <button id="openToast" class="btn btn-primary">Show Toast</button>
+            <button id="openModal" class="btn">Open Modal</button>
+          </div>
+        </div>
+
+        <div class="liquid card">
+          <h4 class="text-white font-semibold">Pagination</h4>
+          <div class="mt-3 flex gap-2">
+            <button class="liquid p-2">«</button>
+            <button class="liquid p-2" style="background:linear-gradient(90deg,var(--accent-1),var(--accent-2)); color:#042236">1</button>
+            <button class="liquid p-2">2</button>
+            <button class="liquid p-2">»</button>
+          </div>
+        </div>
+
+        <div class="liquid card">
+          <h4 class="text-white font-semibold">Breadcrumbs</h4>
+          <div class="mt-3 flex gap-2 items-center">
+            <a class="liquid p-2">Home</a><span class="muted">/</span><a class="liquid p-2">Docs</a>
+          </div>
+        </div>
+
+        <div class="liquid card">
+          <h4 class="text-white font-semibold">Toasts</h4>
+          <div class="mt-3">
+            <div id="toastRoot"></div>
+          </div>
+        </div>
+      </aside>
+
+    </section>
+
+  </main>
+
+  <!-- tooltip element (reused) -->
+  <div id="tooltip" class="tooltip liquid" style="display:block;opacity:0;position:fixed;transform-origin:bottom center;">Tooltip text</div>
+
+  <!-- modal (hidden) -->
+  <div id="modalBackdrop" class="modal-backdrop" style="display:none;">
+    <div class="modal-card liquid modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="liquid-edge"></div>
+      <div style="padding:24px;">
+        <h3 id="modalTitle" style="margin:0 0 8px;color:var(--muted);font-weight:700">Modal Title</h3>
+        <p style="margin:0 0 18px;color:var(--muted-2)">This is a modal that traps focus and sits above other panels.</p>
+        <div class="flex justify-end gap-3">
+          <button id="modalClose" class="liquid btn">Close</button>
+          <button id="modalSave" class="liquid btn btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- small floating spinner demo -->
+  <div style="position:fixed;left:20px;bottom:20px;z-index:9999;">
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    /* ---------------------------
+       Helpers
+       --------------------------- */
+    const $ = (sel, ctx=document) => ctx.querySelector(sel);
+    const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+
+    /* ---------------------------
+       Dropdown: Nav dropdown
+       --------------------------- */
+    (function navDropdown(){
+      const btn = $('#navDropdownBtn');
+      const panel = $('#navDropdown');
+      if(!btn || !panel) return;
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        panel.classList.toggle('hidden');
+        panel.classList.toggle('show');
+      });
+      document.addEventListener('click', (e) => {
+        if (!btn.contains(e.target) && !panel.contains(e.target)){
+          panel.classList.add('hidden');
+          panel.classList.remove('show');
+        }
+      });
+    })();
+
+    /* ---------------------------
+       general dropdowns: demo nav dropdown (kept separate above)
+       --------------------------- */
+    (function generalDrop(){
+      const navD = $('#navDropdownBtn'), navP = $('#navDropdown');
+      // already wired above
+    })();
+
+    /* ---------------------------
+       Search filter button
+       --------------------------- */
+    (function filterBtn(){
+      const filter = $('#filterBtn');
+      if(!filter) return;
+      filter.addEventListener('click', (e) => { e.stopPropagation(); alert('Filter UI placeholder — implement your filters here.'); });
+    })();
+
+    /* ---------------------------
+       Tooltip logic (global, high z)
+       - show near target, ensure not clipped
+       --------------------------- */
+    (function tooltips(){
+      const tooltip = $('#tooltip');
+      let activeTarget = null;
+      function show(el, text){
+        activeTarget = el;
+        tooltip.textContent = text;
+        tooltip.style.opacity = '1';
+        tooltip.style.pointerEvents = 'auto';
+        tooltip.classList.add('show');
+        // compute position
+        const rect = el.getBoundingClientRect();
+        const ttRect = tooltip.getBoundingClientRect();
+        let left = rect.left + rect.width/2 - ttRect.width/2;
+        if(left < 8) left = 8;
+        if(left + ttRect.width > window.innerWidth - 8) left = window.innerWidth - 8 - ttRect.width;
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = (rect.top - ttRect.height - 10) + 'px';
+        tooltip.style.zIndex = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--z-tooltip')) || 1200;
+      }
+      function hide(){
+        tooltip.classList.remove('show');
+        tooltip.style.opacity = '0';
+        tooltip.style.pointerEvents = 'none';
+      }
+
+      // demo hook: any element with data-tooltip attribute
+      document.addEventListener('mouseover', e => {
+        const t = e.target.closest('[data-tooltip]');
+        if(t) show(t, t.getAttribute('data-tooltip'));
+      });
+      document.addEventListener('mouseout', e => {
+        const t = e.target.closest('[data-tooltip]');
+        if(t) hide();
+      });
+    })();
+
+    /* ---------------------------
+       Dropdown demo (right dropdown next to search)
+       --------------------------- */
+    (function demoDropdown(){
+      const dropBtn = $('#dropBtn'); // not always present in full file
+      const dropPanel = $('#dropPanel');
+      if(!dropBtn || !dropPanel) return;
+      dropBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropPanel.classList.toggle('hidden');
+        dropPanel.classList.toggle('show');
+      });
+      document.addEventListener('click', (e) => {
+        if(!dropBtn.contains(e.target) && !dropPanel.contains(e.target)){
+          dropPanel.classList.add('hidden');
+          dropPanel.classList.remove('show');
+        }
+      });
+    })();
+
+    /* ---------------------------
+       Modal: open/close + focus trap
+       --------------------------- */
+    (function modal(){
+      const openBtn = $('#openModal'), modalBackdrop = $('#modalBackdrop'), closeBtn = $('#modalClose'), saveBtn = $('#modalSave');
+      if(!modalBackdrop) return;
+      function trapFocus(container){
+        const focusable = Array.from(container.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+          .filter(n => !n.hasAttribute('disabled'));
+        if(!focusable.length) return;
+        let idx = 0;
+        focusable[0].focus();
+        function handler(e){
+          if(e.key === 'Tab'){
+            e.preventDefault();
+            idx = (idx + (e.shiftKey ? -1 : 1) + focusable.length) % focusable.length;
+            focusable[idx].focus();
+          }
+          if(e.key === 'Escape') close();
+        }
+        container._handler = handler;
+        document.addEventListener('keydown', handler);
+      }
+      function untrap(container){
+        if(container._handler) document.removeEventListener('keydown', container._handler);
+      }
+      function open(){
+        modalBackdrop.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        trapFocus(modalBackdrop);
+      }
+      function close(){
+        modalBackdrop.style.display = 'none';
+        document.body.style.overflow = '';
+        untrap(modalBackdrop);
+      }
+
+      if(openBtn) openBtn.addEventListener('click', open);
+      if(closeBtn) closeBtn.addEventListener('click', close);
+      if(saveBtn) saveBtn.addEventListener('click', () => { alert('Saved (demo)'); close(); });
+      modalBackdrop.addEventListener('click', (e) => { if(e.target === modalBackdrop) close(); });
+    })();
+
+    /* ---------------------------
+       Toasts
+       --------------------------- */
+    (function toasts(){
+      const root = document.getElementById('toastRoot');
+      function show(text, timeout = 3200){
+        if(!root) return;
+        const el = document.createElement('div');
+        el.className = 'liquid p-3 rounded-md';
+        el.style.minWidth = '220px';
+        el.style.background = 'linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))';
+        el.textContent = text;
+        root.appendChild(el);
+        setTimeout(()=> {
+          el.style.transition = 'opacity 260ms, transform 260ms';
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(12px)';
+          setTimeout(()=> el.remove(), 300);
+        }, timeout);
+      }
+      $('#openToast')?.addEventListener('click', ()=> show('This is a demo toast — saved.'));
+      $('#openToast')?.addEventListener('click', ()=> show('Second toast', 5000));
+      $('#openModal')?.addEventListener('click', ()=> $('#modalBackdrop').style.display = 'flex');
+      $('#openToast') && $('#openModal') && $('#openToast').addEventListener('click', ()=> {}); // ensure exists
+      window.showToast = show;
+    })();
+
+    /* ---------------------------
+       Accordion
+       --------------------------- */
+    (function accordion(){
+      $$('.accordion-toggle').forEach(btn => {
+        const target = document.querySelector(btn.dataset.target);
+        if(!target) return;
+        btn.addEventListener('click', ()=> {
+          const isOpen = !target.classList.contains('hidden');
+          if(isOpen){
+            target.classList.add('hidden');
+            target.style.maxHeight = null;
+          } else {
+            target.classList.remove('hidden');
+            target.style.maxHeight = target.scrollHeight + 'px';
+          }
+        });
+      });
+    })();
+
+    /* ---------------------------
+       Tabs
+       --------------------------- */
+    (function tabs(){
+      $$('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', ()=> {
+          $$('.tab-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          $$('.lovable-tabs + *').forEach(el => el.classList.add('hidden'));
+          const t = document.querySelector(btn.dataset.target);
+          if(t) t.classList.remove('hidden');
+        });
+      });
+    })();
+
+    /* ---------------------------
+       Form demo submit / validation
+       --------------------------- */
+    (function demoForm(){
+      const submit = document.getElementById('formSubmit');
+      const email = document.getElementById('email');
+      const password = document.getElementById('password');
+      const status = document.getElementById('formStatus');
+      submit?.addEventListener('click', () => {
+        let ok = true;
+        if(!email.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) ok = false;
+        if(!password.value || password.value.length < 3) ok = false;
+        if(ok){ status.classList.remove('hidden'); status.textContent = 'Submitted'; setTimeout(()=> status.classList.add('hidden'), 2000); }
+        else alert('Validation failed (demo).');
+      });
+    })();
+
+    /* ---------------------------
+       Tooltip demo wiring for elements with data-tooltip attr
+       --------------------------- */
+    (function wireTooltips(){
+      document.addEventListener('mouseenter', e => {
+        const t = e.target.closest('[data-tooltip]');
+        if(!t) return;
+        const tt = $('#tooltip');
+        tt.textContent = t.dataset.tooltip;
+        tt.classList.add('show');
+        tt.style.opacity = '1';
+        const rect = t.getBoundingClientRect();
+        const ttRect = tt.getBoundingClientRect();
+        let left = rect.left + rect.width/2 - ttRect.width/2;
+        if(left < 8) left = 8;
+        if(left + ttRect.width > window.innerWidth - 8) left = window.innerWidth - 8 - ttRect.width;
+        tt.style.left = left + 'px';
+        tt.style.top = (rect.top - ttRect.height - 12) + 'px';
+        tt.style.display = 'block';
+      }, true);
+      document.addEventListener('mouseleave', e => {
+        const t = e.target.closest('[data-tooltip]');
+        if(!t) return;
+        const tt = $('#tooltip');
+        tt.classList.remove('show');
+        tt.style.opacity = '0';
+        setTimeout(()=> void(tt.style.display = 'none'), 180);
+      }, true);
+    })();
+
+    /* ---------------------------
+       z-index balance:
+       - tooltips get high z by default
+       - modals always above
+       --------------------------- */
+    (function zbalance(){
+      const tooltipEl = $('#tooltip');
+      if(tooltipEl) tooltipEl.style.zIndex = '12000';
+      // Modal backdrop uses z-index in CSS variable calc
+      // ensure dropdowns appear below modal but above base content
+      $$('.dropdown-panel').forEach(d => d.style.zIndex = 1050);
+    })();
+
+    // small trap: close panels on escape
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape'){
+        $$('.dropdown-panel').forEach(p => { p.classList.add('hidden'); p.classList.remove('show'); });
+        $('#modalBackdrop') && ($('#modalBackdrop').style.display = 'none');
+      }
+    });
+
+    /* ---- DONE ---- */
+  </script>
+</body>
+</html>

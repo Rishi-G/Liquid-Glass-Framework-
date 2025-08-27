@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple Liquid Glass UI - Authentic Component Library</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --lg-bg-color: rgba(255, 255, 255, 0.25);
+            --lg-highlight: rgba(255, 255, 255, 0.75);
+            --lg-text: #ffffff;
+            --lg-hover-glow: rgba(255, 255, 255, 0.4);
+            --lg-shadow: rgba(0, 0, 0, 0.2);
+        }
+
+        /* Animations */
+        @keyframes liquid-float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-4px) rotate(0.5deg); }
+            66% { transform: translateY(-2px) rotate(-0.5deg); }
+        }
+        
+        @keyframes liquid-pulse {
+            0%, 100% { 
+                background: rgba(255, 255, 255, 0.25);
+                box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.1);
+            }
+            50% { 
+                background: rgba(255, 255, 255, 0.35);
+                box-shadow: 0 8px 8px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 255, 255, 0.1);
+            }
+        }
+
+        @keyframes specular-shine {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        /* Base Glass Container */
+        .liquid-glass {
+            position: relative;
+            display: flex;
+            color: var(--lg-text);
+            cursor: pointer;
+            background: transparent;
+            border-radius: 2rem;
+            overflow: hidden!important;
+            box-shadow: 0 6px 6px var(--lg-shadow), 0 0 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
+        }
+
+        .liquid-glass:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3), 0 0 40px rgba(255, 255, 255, 0.15);
+        }
+
+        /* Glass Layers */
+        .glass-filter {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+                 border-radius: 2rem;
+            backdrop-filter: blur(4px);
+            filter: url(#lg-dist);
+            isolation: isolate;
+        }
+
+        .glass-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+                 border-radius: 2rem;
+            background: var(--lg-bg-color);
+            animation: liquid-pulse 4s ease-in-out infinite;
+        }
+
+        .glass-specular {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+                 border-radius: 2rem;
+   
+            overflow: hidden;
+            box-shadow: 
+                inset 1px 1px 0 var(--lg-highlight),
+                inset 0 0 5px var(--lg-highlight);
+            animation: specular-shine 3s ease-in-out infinite;
+        }
+
+        .glass-content {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            width: 100%;
+        }
+
+        /* Button Variants */
+        .btn-liquid {
+            justify-content: center;
+            font-weight: 600;
+            min-width: 120px;
+            animation: liquid-float 6s ease-in-out infinite;
+        }
+
+        .btn-liquid:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        /* Card Variants */
+        .card-liquid {
+            flex-direction: column;
+            align-items: stretch;
+            min-height: 200px;
+            animation: liquid-float 8s ease-in-out infinite;
+        }
+
+        .card-liquid .glass-content {
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        /* Modal Variants */
+        .modal-liquid {
+            min-width: 400px;
+            min-height: 300px;
+        }
+
+        /* Form Variants */
+        .form-liquid {
+            border-radius: 1rem;
+        }
+
+        .form-liquid .glass-content {
+            padding: 0.75rem 1rem;
+        }
+
+        /* Navigation Variants */
+        .nav-liquid {
+            border-radius: 3rem;
+            min-height: 60px;
+        }
+
+        .nav-liquid .glass-content {
+            justify-content: space-between;
+            padding: 0.5rem 2rem;
+        }
+
+        /* Alert Variants */
+        .alert-liquid {
+            border-radius: 1.5rem;
+        }
+
+        /* Background */
+        body {
+            margin: 0;
+            padding: 2rem 0;
+            min-height: calc(100vh - 4rem);
+            display: flex;
+            flex-direction: column;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-image:url("https://images.unsplash.com/photo-1551384963-cccb0b7ed94b?q=80&w=3247&auto=format&fit=crop&ixlib=rb-4.1.0ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+            animation: bg-subtle-move 10s ease-in-out infinite alternate;
+            background-position: fixed;
+            background-size: cover;
+        }
+
+        @keyframes bg-subtle-move {
+            0% { background-position: center center, center center, center center, center center; }
+            100% { background-position: 20% 80%, 80% 20%, 60% 40%, center top; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Typography */
+        .title-gradient {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 1) 0%,
+                rgba(255, 255, 255, 0.8) 50%,
+                rgba(255, 255, 255, 0.6) 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Special Effects */
+        .glow-effect {
+            position: relative;
+        }
+
+        .glow-effect::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(45deg, 
+                rgba(255, 255, 255, 0.3),
+                rgba(255, 255, 255, 0.1),
+                rgba(255, 255, 255, 0.3));
+            border-radius: inherit;
+            z-index: -1;
+            filter: blur(8px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .glow-effect:hover::before {
+            opacity: 1;
+        }
+
+        /* Input Styles */
+        .liquid-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: white;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .liquid-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Progress Bar */
+        .progress-liquid {
+            height: 8px;
+            border-radius: 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, 
+                rgba(255, 255, 255, 0.8),
+                rgba(255, 255, 255, 0.6),
+                rgba(255, 255, 255, 0.8));
+            background-size: 200% 100%;
+            animation: progress-shine 2s linear infinite;
+            border-radius: inherit;
+        }
+
+        @keyframes progress-shine {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- SVG Filters for Liquid Glass Distortion -->
+    <svg style="display: none">
+        <defs>
+            <filter id="lg-dist" x="0%" y="0%" width="100%" height="100%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="92" result="noise" />
+                <feGaussianBlur in="noise" stdDeviation="2" result="blurred" />
+                <feDisplacementMap in="SourceGraphic" in2="blurred" scale="70" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+            
+            <filter id="lg-dist-strong" x="-20%" y="-20%" width="140%" height="140%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.012 0.012" numOctaves="3" seed="42" result="noise" />
+                <feGaussianBlur in="noise" stdDeviation="3" result="blurred" />
+                <feDisplacementMap in="SourceGraphic" in2="blurred" scale="100" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+
+            <filter id="lg-dist-subtle" x="0%" y="0%" width="100%" height="100%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.005 0.005" numOctaves="1" seed="123" result="noise" />
+                <feGaussianBlur in="noise" stdDeviation="1" result="blurred" />
+                <feDisplacementMap in="SourceGraphic" in2="blurred" scale="40" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </defs>
+    </svg>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="text-center mb-16">
+            <h1 class="text-6xl font-bold mb-6 title-gradient">
+                Apple Liquid Glass UI
+            </h1>
+            <p class="text-xl text-white/80 mb-8">
+                Authentic iOS-inspired liquid glass component library
+            </p>
+        </div>
+
+        <!-- Buttons Section -->
+        <section class="mb-20">
+            <h2 class="text-4xl font-bold text-white mb-12 text-center">Liquid Glass Buttons</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Primary Button -->
+                <div class="liquid-glass btn-liquid glow-effect">
+                    <div class="glass-filter"></div>
+                    <div class="glass-overlay"></div>
+                    <div class="glass-specular"></div>
+                    <div class="glass-content">
+                        <span class="font-semibold">Primary</span>
+                    </div>
+                </div>
+
+                <!-- Secondary Button -->
+                <div class="liquid-glass btn-liquid">
+                    <div class="glass-filter" style="filter: url(#lg-dist-subtle);"></div>
+                    <div class="glass-overlay" style="background: rgba(255, 255, 255, 0.15);"></div>
+                    <div class="glass-specular"></div>
+                    <div class="glass-content">
+                        <span class="font-semibold">Secondary</span>
+                    </div>
+                </div>
+
+                <!-- Success Button -->
+                <div class="liquid-glass btn-liquid">
+                    <div class="glass-filter"></div>
+                    <div class="glass-overlay" style="background: rgba(34, 197, 94, 0.3);"></div>
+                    <div class="glass-specular"></div>
+                    <div class="glass-content">
+                        <span class="font-semibold">Success</span>
+                    </div>
+                </div>
+
+                <!-- Danger Button -->
+                <div class="liquid-glass btn-liquid">
+                    <div class="glass-filter"></div>
+                    <div class="glass-overlay" style="background: rgba(239, 68, 68, 0.3);"></div>
+                    <div class="glass-specular"></div>
+                    <div class="glass-content">
+                        <span class="font-semibold">Danger</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cards Section -->
+        <section class="mb-20">
+            <h2 class="text-4xl font-bold text-white mb-12 text-center">Liquid Glass Cards</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature Card -->
+                <div class="liquid-glass card-liquid glow-effect">
+                    <div class="glass-filter"></div>
+                    <div class="glass-overlay"></div>
+                    <div class="glass-specular"></div>
+                    <div class="glass-content">
+                        <div>
+                            <div class="w-12 h-12 bg-white/20 rounded-xl mb-4 flex items-center justify-center text-2xl">
+                                ✨
+                            </div>
+                            <h3 class="text-xl font-bold mb-3">Liquid Glass Effect</h3>
+                            <p class="text-white/80 mb-4">
+                                Authentic Apple-inspired liquid glass with real distortion and refraction effects.
+                            </p>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Premium</span>
+                            <span class="px-3 py-1 bg-white/20 rounded-full text-sm">iOS</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Card -->
+                <div class="liquid-glass card-liquid">
+                    <div class="glass-filter" style="filter: url(#lg-dist-strong);"></div>
+                    <div class="glass-overlay"></div>
+                    <div class="glass-specular"></div>
+                    <div class="glass-content text-center">
+                        <div>
+                            <div class="text-4xl font-bold mb-2">99.9%</div>
+                            <p class="text-white/70 mb-4">Glass Authenticity</p>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center px-4 py-2 bg-white/10 rounded-xl">
+                                <span class="text-sm">Distortion</span>
+                                <span class="text-green-300 text-sm">Active</span>
+                            </div>
+                            <div class="flex justify-between items-center px-4 py-2 bg-white/10 rounded-xl">
+                                <span class="text-sm">Refraction</span>
+                                <span class="text-blue-300 text-sm">Ultra</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Media Card -->
+                <div class="liquid-glass card-liquid">
+                    <div class="glass-filter"></div>
+                    <div class="glass-overlay"></div>
+                    <div class="glass-specular"></div>
+                    <div class="glass-content">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-xl"></div>
+                            <div>
+                                <h3 class="font-bold">Liquid Dreams</h3>
+                                <p class="text-white/70 text-sm">Apple Music</p>
+                            </div>
+                        </div>
+                        <div class="progress-liquid mb-4">
+                            <div class="glass-filter"></div>
+                            <div class="glass-overlay" style="background: rgba(255, 255, 255, 0.1);"></div>
+                            <div class="progress-fill" style="width: 65%;"></div>
+                        </div>
+                        <div class="flex justify-center gap-4">
+                            <button class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                                ⏮
+                            </button>
+                            <button class="w-12 h-12 bg-white/30 rounded-full flex items-center justify-center">
+                                ⏯
+                            </button>
+                            <button class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                                ⏭
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation -->
+        <section class="mb-20">
+            <h2 class="text-4xl font-bold text-white mb-12 text-center">Liquid Glass Navigation</h2>
+            <div class="liquid-glass nav-liquid glow-effect">
+                <div class="glass-filter"></div>
+                <div class="glass-overlay"></div>
+                <div class="glass-specular"></div>
+                <div class="glass-content">
+                    <div class="text-xl font-bold">LiquidUI</div>
+                    <nav class="hidden md:flex gap-8">
+                        <a href="#" class="hover:text-white/80 transition-colors">Home</a>
+                        <a href="#" class="hover:text-white/80 transition-colors">Components</a>
+                        <a href="#" class="hover:text-white/80 transition-colors">Documentation</a>
+                        <a href="#" class="px-4 py-2 bg-white/20 rounded-2xl hover:bg-white/30 transition-colors">Get Started</a>
+                    </nav>
+                    <button class="md:hidden text-2xl">☰</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modal Demo -->
+        <section class="mb-20">
+            <h2 class="text-4xl font-bold text-white mb-12 text-center">Liquid Glass Modal</h2>
+            <div class="text-center mb-8">
+                <button onclick="openModal()" class="liquid-glass btn-liquid glow-effect">
+                    <div class="glass-filter"></div>
+                    <div class="glass-overlay"></div>
+                    <div class="glass-specular"></div>
+                    <div class="glass-content">
+                        <span class="font-semibold">Open Modal</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Modal -->
+            <div id="liquidModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+                <div class="liquid-glass modal-liquid glow-effect">
+                    <div class="glass-filter" style="filter: url(#lg-dist-strong);"></div>
+                    <div class="glass-overlay"></div>
+                    <div class="glass-specular"></div>
+                    <div class="glass-content flex-col">
+                        <div class="flex justify-between items-start mb-6 w-full">
+                            <div>
+                                <h3 class="text-2xl font-bold mb-2">Liquid Glass Modal</h3>
+                                <p class="text-white/70">Powered by authentic Apple liquid glass technology</p>
+                            </div>
+                            <button onclick="closeModal()" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+                                ×
+                            </button>
+                        </div>
+                        
+                        <div class="mb-6 w-full">
+                            <p class="text-white/80 mb-4">
+                                Experience the future of web interfaces with authentic liquid glass distortion effects.
+                            </p>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="text-center p-4 bg-white/10 rounded-xl">
+                                    <div class="text-2xl mb-2">🌊</div>
+                                    <div class="text-sm">Liquid Flow</div>
+                                </div>
+                                <div class="text-center p-4 bg-white/10 rounded-xl">
+                                    <div class="text-2xl mb-2">✨</div>
+                                    <div class="text-sm">Glass Distortion</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-4 w-full">
+                            <button onclick="closeModal()" class="flex-1 px-4 py-3 bg-white/10 rounded-xl hover:bg-white/20 transition-colors">
+                                Cancel
+                            </button>
+                            <button onclick="closeModal()" class="flex-1 px-4 py-3 bg-white/30 rounded-xl hover:bg-white/40 transition-colors font-semibold">
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Forms -->
+        <section class="mb-20">
+            <h2 class="text-4xl font-bold text-white mb-12 text-center">Liquid Glass Forms</h2>
+            <div class="max-w-md mx-auto space-y-6">
+                <div class="liquid-glass form-liquid">
+                    <div class="glass-filter" style="filter: url(#lg-dist-subtle);"></div>
+                    <div class="glass-overlay"></div>
+                    <div class="glass-specular"></div>
+                    <div class="glass-content">
+                        <input type="text" placeholder="Email address" class="liquid-input">
+                    </div>
+                </div>
+
+                <div class="liquid-glass form-liquid">
+                    <div class="glass-filter" style="filter: url(#lg-dist-subtle);"></div>
+                    <div class="glass-overlay"></div>
+                    <div class="glass-specular"></div>
+                    <div class="glass-content">
+                        <input type="password" placeholder="Password" class="liquid-input">
+                    </div>
+                </div>
+
+                <div class="liquid-glass form-liquid" style="min-height: 120px;">
+                    <div class="glass-filter" style="filter: url(#lg-dist-subtle);"></div>
+                    <div class="glass-overlay"></div>
+                    <div class="glass-specular"></div>
+                    <div class="glass-content">
+                        <textarea placeholder="Your message..." rows="3" class="liquid-input resize-none"></textarea>
+                    </div>
+                </div>
+
+                <div class="liquid-glass btn-liquid glow-effect w-full">
+                    <div class="glass-filter"></div>
+                    <div class="glass-overlay"></div>
+                    <div class="glass-specular"></div>
+                    <div class="glass-content justify-center">
+                        <span class="font-semibold">Submit</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Alerts -->
+        <section class="mb-20">
+            <h2 class="text-4xl font-bold text-white mb-12 text-center">Liquid Glass Alerts</h2>
+            <div class="max-w-2xl mx-auto space-y-6">
+                <div class="liquid-glass alert-liquid">
+                    <div class="glass-filter"></div>
+                    <div class="glass-overlay" style="background: rgba(34, 197, 94, 0.25);"></div>
+                    <div class="glass-specular"></div>
+                    <div class="glass-content">
+                        <div class="w-10 h-10 bg-green-500/30 rounded-xl flex items-center justify-center mr-4">
+                            ✓
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-green-100">Success!</h4>
+                            <p class="text-green-200/80">Your liquid glass component has been created successfully.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="liquid-glass alert-liquid">
+                    <div class="glass-filter"></div>
+                    <div class="glass-overlay" style="background: rgba(251, 191, 36, 0.25);"></div>
+                    <div class="glass-specular"></div>
+                    <div class="glass-content">
+                        <div class="w-10 h-10 bg-yellow-500/30 rounded-xl flex items-center justify-center mr-4">
+                            ⚠
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-yellow-100">Warning</h4>
+                            <p class="text-yellow-200/80">Some liquid glass effects require modern browser support.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="liquid-glass alert-liquid">
+                    <div class="glass-filter"></div>
+                    <div class="glass-overlay" style="background: rgba(59, 130, 246, 0.25);"></div>
+                    <div class="glass-specular"></div>
+                    <div class="glass-content">
+                        <div class="w-10 h-10 bg-blue-500/30 rounded-xl flex items-center justify-center mr-4">
+                            ℹ
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-blue-100">Info</h4>
+                            <p class="text-blue-200/80">This liquid glass library works best in Chromium-based browsers.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center mt-20">
+            <div class="liquid-glass glow-effect" style="border-radius: 2rem;">
+                <div class="glass-filter"></div>
+                <div class="glass-overlay"></div>
+                <div class="glass-specular"></div>
+                <div class="glass-content justify-center flex-col py-8">
+                    <h3 class="text-2xl font-bold mb-4 title-gradient">Apple Liquid Glass UI</h3>
+                    <p class="text-white/70">
+                        Authentic iOS-inspired liquid glass component library
+                    </p>
+                    <p class="text-white/50 text-sm mt-2">
+                        Built with advanced SVG filters and authentic Apple design principles
+                    </p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('liquidModal').classList.remove('hidden');
+            document.getElementById('liquidModal').classList.add('flex');
+        }
+        
+        function closeModal() {
+            document.getElementById('liquidModal').classList.add('hidden');
+            document.getElementById('liquidModal').classList.remove('flex');
+        }
+        
+        // Close modal on backdrop click
+        document.getElementById('liquidModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+        
+        // Add interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            const liquidElements = document.querySelectorAll('.liquid-glass');
+            
+            liquidElements.forEach(element => {
+                element.addEventListener('mouseenter', function() {
+                    const overlay = this.querySelector('.glass-overlay');
+                    if (overlay) {
+                        overlay.style.background = 'rgba(255, 255, 255, 0.35)';
+                    }
+                });
+                
+                element.addEventListener('mouseleave', function() {
+                    const overlay = this.querySelector('.glass-overlay');
+                    if (overlay && !overlay.style.background.includes('rgb')) {
+                        overlay.style.background = 'rgba(255, 255, 255, 0.25)';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

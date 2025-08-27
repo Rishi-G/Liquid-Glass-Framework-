@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS 26 Liquid Glass Design System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            /* Enhanced Glass Colors */
+            --glass-white: rgba(255, 255, 255, 0.25);
+            --glass-white-light: rgba(255, 255, 255, 0.18);
+            --glass-white-lighter: rgba(255, 255, 255, 0.12);
+            --glass-white-border: rgba(255, 255, 255, 0.3);
+            --glass-white-border-light: rgba(255, 255, 255, 0.2);
+            --glass-shadow-dark: rgba(31, 38, 135, 0.37);
+            --glass-shadow-light: rgba(255, 255, 255, 0.1);
+            
+            /* Enhanced Blur */
+            --blur-ultra: 40px;
+            --blur-heavy: 25px;
+            --blur-medium: 16px;
+            --blur-light: 10px;
+            --blur-subtle: 6px;
+            
+            /* Advanced Shadows */
+            --shadow-glass-float: 
+                0 8px 32px rgba(31, 38, 135, 0.37),
+                0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+                0 2px 16px rgba(255, 255, 255, 0.1) inset;
+            --shadow-glass-pressed: 
+                0 2px 16px rgba(31, 38, 135, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+            --shadow-glass-elevated: 
+                0 16px 64px rgba(31, 38, 135, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+                0 4px 24px rgba(255, 255, 255, 0.15) inset;
+            
+            /* Radius System */
+            --radius-xs: 6px;
+            --radius-sm: 10px;
+            --radius-md: 14px;
+            --radius-lg: 18px;
+            --radius-xl: 22px;
+            --radius-2xl: 28px;
+            --radius-3xl: 36px;
+            
+            /* Animation */
+            --spring: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+            --transition-base: 0.3s var(--ease-out-expo);
+        }
+
+        /* Enhanced Glass Base */
+        .glass {
+            background: linear-gradient(135deg, 
+                var(--glass-white) 0%,
+                var(--glass-white-light) 100%);
+            backdrop-filter: blur(var(--blur-medium)) saturate(180%);
+            -webkit-backdrop-filter: blur(var(--blur-medium)) saturate(180%);
+            border: 1px solid var(--glass-white-border);
+            box-shadow: var(--shadow-glass-float);
+            transition: all var(--transition-base);
+        }
+
+        .glass-ultra {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.4) 0%,
+                rgba(255, 255, 255, 0.1) 100%);
+            backdrop-filter: blur(var(--blur-ultra)) saturate(200%);
+            -webkit-backdrop-filter: blur(var(--blur-ultra)) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: var(--shadow-glass-elevated);
+        }
+
+        .glass-subtle {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(var(--blur-subtle)) saturate(150%);
+            -webkit-backdrop-filter: blur(var(--blur-subtle)) saturate(150%);
+            border: 1px solid var(--glass-white-border-light);
+            box-shadow: 
+                0 4px 16px rgba(31, 38, 135, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+        }
+
+        /* Morphing Glass Effect */
+        .glass-morph {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-morph::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(
+                circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0.1) 25%,
+                transparent 50%
+            );
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+            z-index: 1;
+        }
+
+        .glass-morph:hover::before {
+            opacity: 1;
+        }
+
+        .glass-morph > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Interactive States */
+        .glass-hover:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 
+                0 12px 48px rgba(31, 38, 135, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+                0 4px 20px rgba(255, 255, 255, 0.2) inset;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .glass-press:active {
+            transform: translateY(1px) scale(0.98);
+            box-shadow: var(--shadow-glass-pressed);
+        }
+
+        /* Component Styles */
+        .glass-button {
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all var(--transition-base) var(--spring);
+            text-decoration: none;
+            border: none;
+        }
+
+        .glass-input {
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--glass-white-border-light);
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(var(--blur-light));
+            color: white;
+            font-size: 14px;
+            transition: all var(--transition-base);
+        }
+
+        .glass-input:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.6);
+            box-shadow: 
+                0 0 0 3px rgba(59, 130, 246, 0.2),
+                0 4px 16px rgba(31, 38, 135, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0.08) 100%);
+        }
+
+        .glass-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Custom Checkbox */
+        .glass-checkbox {
+            width: 20px;
+            height: 20px;
+            border-radius: var(--radius-xs);
+            border: 2px solid var(--glass-white-border);
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(var(--blur-light));
+            position: relative;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .glass-checkbox:checked {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-color: #3b82f6;
+            box-shadow: 
+                0 4px 12px rgba(59, 130, 246, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+        }
+
+        .glass-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Custom Radio */
+        .glass-radio {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--glass-white-border);
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(var(--blur-light));
+            position: relative;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .glass-radio:checked {
+            border-color: #3b82f6;
+            box-shadow: 
+                0 4px 12px rgba(59, 130, 246, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+        }
+
+        .glass-radio:checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #3b82f6;
+        }
+
+        /* Switch Toggle */
+        .glass-switch {
+            width: 44px;
+            height: 24px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(255, 255, 255, 0.05) 100%);
+            border: 1px solid var(--glass-white-border-light);
+            backdrop-filter: blur(var(--blur-light));
+            position: relative;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .glass-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.9) 0%,
+                rgba(255, 255, 255, 0.7) 100%);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: all var(--transition-base) var(--spring);
+        }
+
+        .glass-switch:checked {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-color: #3b82f6;
+        }
+
+        .glass-switch:checked::after {
+            transform: translateX(20px);
+        }
+
+        /* Modal */
+        .glass-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(var(--blur-heavy));
+            -webkit-backdrop-filter: blur(var(--blur-heavy));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-base);
+        }
+
+        .glass-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .glass-modal-content {
+            max-width: 500px;
+            width: 90%;
+            padding: 32px;
+            border-radius: var(--radius-2xl);
+            transform: translateY(50px) scale(0.9);
+            transition: all var(--transition-base) var(--spring);
+        }
+
+        .glass-modal.active .glass-modal-content {
+            transform: translateY(0) scale(1);
+        }
+
+        /* Tooltip */
+        .glass-tooltip {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .glass-tooltip-content {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, 
+                rgba(0, 0, 0, 0.8) 0%,
+                rgba(0, 0, 0, 0.9) 100%);
+            color: white;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-base);
+            z-index: 100;
+        }
+
+        .glass-tooltip-content::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 4px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.9);
+        }
+
+        .glass-tooltip:hover .glass-tooltip-content {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-12px);
+        }
+
+        /* Dropdown */
+        .glass-dropdown {
+            position: relative;
+        }
+
+        .glass-dropdown-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 200px;
+            padding: 8px;
+            margin-top: 8px;
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, 
+                var(--glass-white) 0%,
+                var(--glass-white-light) 100%);
+            backdrop-filter: blur(var(--blur-medium)) saturate(180%);
+            border: 1px solid var(--glass-white-border);
+            box-shadow: var(--shadow-glass-elevated);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all var(--transition-base) var(--spring);
+            z-index: 100;
+        }
+
+        .glass-dropdown.active .glass-dropdown-content {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .glass-dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            color: white;
+            text-decoration: none;
+            transition: all var(--transition-base);
+            cursor: pointer;
+        }
+
+        .glass-dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Slider */
+        .glass-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(var(--blur-light));
+            outline: none;
+            cursor: pointer;
+        }
+
+        .glass-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            box-shadow: 
+                0 4px 12px rgba(59, 130, 246, 0.4),
+                0 0 0 2px rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .glass-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 
+                0 6px 16px rgba(59, 130, 246, 0.6),
+                0 0 0 3px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Tabs */
+        .glass-tabs {
+            display: flex;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.05) 0%,
+                rgba(255, 255, 255, 0.02) 100%);
+            border-radius: var(--radius-lg);
+            padding: 4px;
+            border: 1px solid var(--glass-white-border-light);
+            backdrop-filter: blur(var(--blur-light));
+        }
+
+        .glass-tab {
+            flex: 1;
+            padding: 10px 16px;
+            text-align: center;
+            border-radius: var(--radius-sm);
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            font-weight: 500;
+        }
+
+        .glass-tab.active {
+            background: linear-gradient(135deg, 
+                var(--glass-white-light) 0%,
+                var(--glass-white-lighter) 100%);
+            color: white;
+            box-shadow: 
+                0 2px 8px rgba(31, 38, 135, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        }
+
+        /* Progress Bar */
+        .glass-progress {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(var(--blur-light));
+            border: 1px solid var(--glass-white-border-light);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .glass-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+            border-radius: 4px;
+            transition: width var(--transition-base);
+            position: relative;
+        }
+
+        .glass-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                transparent 100%);
+            animation: shine 2s ease-in-out infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Background */
+        body {
+            background: linear-gradient(135deg, 
+                #1e3a8a 0%, 
+                #3730a3 25%, 
+                #7c3aed 50%, 
+                #c026d3 75%, 
+                #e11d48 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 20s ease infinite;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            25% { background-position: 100% 50%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+        }
+
+        /* Animations */
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .animate-pulse-glass {
+            animation: pulseGlass 2s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(1deg); }
+            66% { transform: translateY(10px) rotate(-0.5deg); }
+        }
+
+        @keyframes pulseGlass {
+            0%, 100% { 
+                box-shadow: var(--shadow-glass-float);
+                border-color: var(--glass-white-border);
+            }
+            50% { 
+                box-shadow: var(--shadow-glass-elevated);
+                border-color: rgba(255, 255, 255, 0.4);
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { 
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0.1) 100%);
+            border-radius: 4px; 
+            backdrop-filter: blur(10px);
+        }
+        ::-webkit-scrollbar-thumb:hover { 
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.4) 0%,
+                rgba(255, 255, 255, 0.2) 100%);
+        }
+    </style>
+</head>
+
+<body class="p-8" id="app">
+    <!-- SVG Filters for Advanced Effects -->
+    <svg width="0" height="0" style="position: absolute;">
+        <defs>
+            <filter id="gooey">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+                <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="gooey"/>
+                <feComposite in="SourceGraphic" in2="gooey" operator="atop"/>
+            </filter>
+            
+            <filter id="liquid" x="-20%" y="-20%" width="140%" height="140%">
+                <feTurbulence baseFrequency="0.04" numOctaves="3" result="noise"/>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="8"/>
+            </filter>
+            
+            <filter id="chromatic" x="-10%" y="-10%" width="120%" height="120%">
+                <feOffset in="SourceGraphic" dx="2" dy="0" result="red"/>
+                <feOffset in="SourceGraphic" dx="-2" dy="0" result="blue"/>
+                <feBlend in="red" in2="SourceGraphic" mode="screen" result="redBlend"/>
+                <feBlend in="blue" in2="redBlend" mode="screen"/>
+            </filter>
+        </defs>
+    </svg>
+
+    <div class="container mx-auto max-w-7xl space-y-8">
+        <!-- Header -->
+        <header class="text-center mb-16">
+            <div class="glass glass-morph inline-block p-8 rounded-3xl animate-float">
+                <h1 class="text-6xl font-bold text-white mb-4 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+                    iOS 26 Liquid Glass
+                </h1>
+                <p class="text-xl text-white/90">Ultra-Modern Design System</p>
+            </div>
+        </header>
+
+        <!-- Interactive Showcase -->
+        <section class="glass glass-morph p-8 rounded-3xl animate-pulse-glass">
+            <h2 class="text-3xl font-bold text-white mb-8 text-center">Interactive Components</h2>
+            
+            <!-- Buttons Section -->
+            <div class="mb-12">
+                <h3 class="text-xl font-semibold text-white mb-6">Buttons & Controls</h3>
+                <div class="flex flex-wrap gap-4 mb-8">
+                    <button class="glass glass-button glass-hover glass-press text-white glass-morph">
+                        <i class="fas fa-heart"></i>
+                        Primary Button
+                    </button>
+                    <button class="glass-subtle glass-button glass-hover glass-press text-white glass-morph">
+                        <i class="fas fa-star"></i>
+                        Subtle Button
+                    </button>
+                    <button class="glass-ultra glass-button glass-hover glass-press text-white glass-morph">
+                        <i class="fas fa-magic"></i>
+                        Ultra Glass
+                    </button>
+                    <div class="glass-tooltip">
+                        <button class="glass glass-button glass-hover glass-press text-white glass-morph">
+                            <i class="fas fa-info-circle"></i>
+                            Hover for Tooltip
+                        </button>
+                        <div class="glass-tooltip-content">
+                            This is a glass tooltip with blur effects!
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Controls -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                <!-- Inputs -->
+                <div>
+                    <h4 class="text-lg font-medium text-white mb-4">Input Fields</h4>
+                    <div class="space-y-4">
+                        <input type="text" placeholder="Glass Input Field" class="glass-input w-full">
+                        <div class="relative">
+                            <input type="email" placeholder="Email with icon" class="glass-input w-full pl-10">
+                            <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70"></i>
+                        </div>
+                        <textarea placeholder="Glass Textarea" class="glass-input w-full h-24 resize-none"></textarea>
+                    </div>
+                </div>
+
+                <!-- Checkboxes & Radios -->
+                <div>
+                    <h4 class="text-lg font-medium text-white mb-4">Selection Controls</h4>
+                    <div class="space-y-4">
+                        <label class="flex items-center gap-3 text-white cursor-pointer">
+                            <input type="checkbox" class="glass-checkbox">
+                            <span>Glass Checkbox</span>
+                        </label>
+                        <label class="flex items-center gap-3 text-white cursor-pointer">
+                            <input type="checkbox" class="glass-checkbox" checked>
+                            <span>Checked Option</span>
+                        </label>
+                        
+                        <div class="pt-4">
+                            <label class="flex items-center gap-3 text-white cursor-pointer mb-3">
+                                <input type="radio" name="glass-radio" class="glass-radio" checked>
+                                <span>Radio Option 1</span>
+                            </label>
+                            <label class="flex items-center gap-3 text-white cursor-pointer">
+                                <input type="radio" name="glass-radio" class="glass-radio">
+                                <span>Radio Option 2</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toggles & Sliders -->
+                <div>
+                    <h4 class="text-lg font-medium text-white mb-4">Toggles & Ranges</h4>
+                    <div class="space-y-6">
+                        <label class="flex items-center gap-3 text-white cursor-pointer">
+                            <input type="checkbox" class="glass-switch">
+                            <span>Glass Toggle</span>
+                        </label>
+                        <label class="flex items-center gap-3 text-white cursor-pointer">
+                            <input type="checkbox" class="glass-switch" checked>
+                            <span>Active Toggle</span>
+                        </label>
+                        
+                        <div class="pt-4">
+                            <label class="block text-white mb-2">Glass Slider</label>
+                            <input type="range" min="0" max="100" value="60" class="glass-slider">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="mb-12">
+                <h4 class="text-lg font-medium text-white mb-4">Tab Navigation</h4>
+                <div class="glass-tabs" id="tabs">
+                    <div class="glass-tab active" onclick="switchTab(0)">Overview</div>
+                    <div class="glass-tab" onclick="switchTab(1)">Features</div>
+                    <div class="glass-tab" onclick="switchTab(2)">Settings</div>
+                    <div class="glass-tab" onclick="switchTab(3)">About</div>
+                </div>
+                
+                <div class="mt-6">
+                    <div class="glass-subtle p-6 rounded-2xl tab-content active" id="tab-0">
+                        <h5 class="text-white font-semibold mb-3">Overview Content</h5>
+                        <p class="text-white/80">This design system provides a comprehensive set of glass morphism components with advanced blur effects, liquid animations, and iOS 26 inspired aesthetics.</p>
+                    </div>
+                    <div class="glass-subtle p-6 rounded-2xl tab-content" id="tab-1" style="display: none;">
+                        <h5 class="text-white font-semibold mb-3">Features Content</h5>
+                        <ul class="text-white/80 space-y-2">
+                            <li>• Advanced backdrop blur with saturation</li>
+                            <li>• SVG filters for liquid effects</li>
+                            <li>• Morphing glass interactions</li>
+                            <li>• CSS variables for full customization</li>
+                        </ul>
+                    </div>
+                    <div class="glass-subtle p-6 rounded-2xl tab-content" id="tab-2" style="display: none;">
+                        <h5 class="text-white font-semibold mb-3">Settings Content</h5>
+                        <p class="text-white/80">Configure your glass components with custom blur levels, opacity values, and animation speeds using CSS variables.</p>
+                    </div>
+                    <div class="glass-subtle p-6 rounded-2xl tab-content" id="tab-3" style="display: none;">
+                        <h5 class="text-white font-semibold mb-3">About Content</h5>
+                        <p class="text-white/80">Created with modern web technologies, this design system brings the future of glass morphism to your applications.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress & Loading -->
+            <div class="mb-12">
+                <h4 class="text-lg font-medium text-white mb-4">Progress & Loading</h4>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-white mb-2">Progress Bar (75%)</label>
+                        <div class="glass-progress">
+                            <div class="glass-progress-fill" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-white mb-2">Loading Progress (45%)</label>
+                        <div class="glass-progress">
+                            <div class="glass-progress-fill" id="animated-progress" style="width: 45%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dropdown & Modal Triggers -->
+            <div class="flex flex-wrap gap-4">
+                <div class="glass-dropdown" id="dropdown">
+                    <button class="glass glass-button glass-hover glass-press text-white glass-morph" onclick="toggleDropdown()">
+                        <i class="fas fa-chevron-down transition-transform" id="dropdown-icon"></i>
+                        Dropdown Menu
+                    </button>
+                    <div class="glass-dropdown-content">
+                        <a href="#" class="glass-dropdown-item">
+                            <i class="fas fa-home mr-3"></i>
+                            Dashboard
+                        </a>
+                        <a href="#" class="glass-dropdown-item">
+                            <i class="fas fa-user mr-3"></i>
+                            Profile
+                        </a>
+                        <a href="#" class="glass-dropdown-item">
+                            <i class="fas fa-settings mr-3"></i>
+                            Settings
+                        </a>
+                        <div class="border-t border-white/10 my-2"></div>
+                        <a href="#" class="glass-dropdown-item text-red-300">
+                            <i class="fas fa-sign-out mr-3"></i>
+                            Logout
+                        </a>
+                    </div>
+                </div>
+
+                <button class="glass glass-button glass-hover glass-press text-white glass-morph" onclick="openModal()">
+                    <i class="fas fa-external-link-alt"></i>
+                    Open Modal
+                </button>
+
+                <button class="glass glass-button glass-hover glass-press text-white glass-morph" onclick="showNotification()">
+                    <i class="fas fa-bell"></i>
+                    Show Notification
+                </button>
+            </div>
+        </section>
+
+        <!-- Component Gallery -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Profile Card -->
+            <div class="glass glass-morph glass-hover p-6 rounded-3xl group">
+                <div class="flex items-center space-x-4 mb-4">
+                    <div class="w-16 h-16 glass rounded-full flex items-center justify-center text-2xl">
+                        <i class="fas fa-user text-white/80"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-semibold text-lg">Ramesh Sippi</h3>
+                        <p class="text-white/70">Senior UI Designer</p>
+                    </div>
+                </div>
+                <p class="text-white/80 mb-6">Crafting next-generation glass interfaces with advanced morphism effects and liquid animations.</p>
+                <div class="flex gap-3">
+                    <button class="glass-subtle glass-button glass-hover text-white text-sm flex-1">
+                        <i class="fas fa-user-plus"></i>
+                        Follow
+                    </button>
+                    <button class="glass-subtle glass-button glass-hover text-white text-sm flex-1">
+                        <i class="fas fa-envelope"></i>
+                        Message
+                    </button>
+                </div>
+            </div>
+
+            <!-- Analytics Card -->
+            <div class="glass glass-morph glass-hover p-6 rounded-3xl">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-white font-semibold text-lg">Analytics</h3>
+                    <div class="glass-subtle p-3 rounded-xl">
+                        <i class="fas fa-chart-line text-white/80"></i>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-white/70">Total Views</span>
+                        <div class="text-right">
+                            <span class="text-white font-semibold text-lg">12.4K</span>
+                            <span class="text-green-400 text-sm ml-2">+12%</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-white/70">Downloads</span>
+                        <div class="text-right">
+                            <span class="text-white font-semibold text-lg">3.2K</span>
+                            <span class="text-blue-400 text-sm ml-2">+8%</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-white/70">Engagement</span>
+                        <div class="text-right">
+                            <span class="text-white font-semibold text-lg">84%</span>
+                            <span class="text-purple-400 text-sm ml-2">+5%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mini Chart Visualization -->
+                <div class="mt-6">
+                    <div class="glass-progress mb-2">
+                        <div class="glass-progress-fill" style="width: 84%"></div>
+                    </div>
+                    <p class="text-white/60 text-xs">Performance Score</p>
+                </div>
+            </div>
+
+            <!-- Feature Showcase -->
+            <div class="glass glass-morph glass-hover p-6 rounded-3xl text-center">
+                <div class="glass-ultra w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 animate-float">
+                    <i class="fas fa-magic text-3xl text-white/90"></i>
+                </div>
+                <h3 class="text-white font-semibold text-lg mb-3">Liquid Glass Effects</h3>
+                <p class="text-white/70 text-sm mb-6">Advanced SVG filters create realistic liquid glass distortions with chromatic aberration.</p>
+                <button class="glass-subtle glass-button glass-hover text-white w-full">
+                    <i class="fas fa-arrow-right"></i>
+                    Explore Features
+                </button>
+            </div>
+
+            <!-- Settings Panel -->
+            <div class="glass glass-morph glass-hover p-6 rounded-3xl">
+                <h3 class="text-white font-semibold text-lg mb-6">Quick Settings</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-white/80">Dark Mode</span>
+                        <input type="checkbox" class="glass-switch" checked>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-white/80">Notifications</span>
+                        <input type="checkbox" class="glass-switch" checked>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-white/80">Auto-sync</span>
+                        <input type="checkbox" class="glass-switch">
+                    </div>
+                    <div class="pt-2">
+                        <label class="block text-white/80 mb-2">Blur Intensity</label>
+                        <input type="range" min="10" max="40" value="25" class="glass-slider">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Music Player Card -->
+            <div class="glass glass-morph glass-hover p-6 rounded-3xl">
+                <div class="flex items-center space-x-4 mb-4">
+                    <div class="w-12 h-12 glass-ultra rounded-lg flex items-center justify-center">
+                        <i class="fas fa-music text-white/80"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-white font-medium">Liquid Dreams</h4>
+                        <p class="text-white/60 text-sm">Glass Morphism</p>
+                    </div>
+                    <div class="glass-tooltip">
+                        <button class="glass-subtle p-2 rounded-lg glass-hover">
+                            <i class="fas fa-heart text-white/70"></i>
+                        </button>
+                        <div class="glass-tooltip-content">Add to favorites</div>
+                    </div>
+                </div>
+                
+                <div class="glass-progress mb-3">
+                    <div class="glass-progress-fill" style="width: 35%"></div>
+                </div>
+                
+                <div class="flex justify-center space-x-4">
+                    <button class="glass-subtle p-2 rounded-lg glass-hover">
+                        <i class="fas fa-backward text-white/70"></i>
+                    </button>
+                    <button class="glass p-3 rounded-xl glass-hover">
+                        <i class="fas fa-play text-white"></i>
+                    </button>
+                    <button class="glass-subtle p-2 rounded-lg glass-hover">
+                        <i class="fas fa-forward text-white/70"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Weather Widget -->
+            <div class="glass glass-morph glass-hover p-6 rounded-3xl">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h4 class="text-white font-medium">San Francisco</h4>
+                        <p class="text-white/60 text-sm">Partly Cloudy</p>
+                    </div>
+                    <div class="glass-ultra p-3 rounded-xl">
+                        <i class="fas fa-cloud-sun text-white/80 text-xl"></i>
+                    </div>
+                </div>
+                
+                <div class="text-4xl font-bold text-white mb-4">22°C</div>
+                
+                <div class="flex justify-between text-sm">
+                    <div class="text-center">
+                        <p class="text-white/60">High</p>
+                        <p class="text-white font-medium">26°</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-white/60">Low</p>
+                        <p class="text-white font-medium">18°</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-white/60">Humidity</p>
+                        <p class="text-white font-medium">65%</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Design Tokens Documentation -->
+        <section class="glass glass-morph p-8 rounded-3xl">
+            <h2 class="text-3xl font-bold text-white mb-8">Design System Tokens</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="glass-subtle p-6 rounded-2xl">
+                    <h4 class="text-white font-semibold mb-4">Glass Opacity</h4>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <code class="text-blue-300 text-sm">--glass-white</code>
+                            <span class="text-white/70 text-sm">25%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <code class="text-blue-300 text-sm">--glass-white-light</code>
+                            <span class="text-white/70 text-sm">18%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <code class="text-blue-300 text-sm">--glass-white-lighter</code>
+                            <span class="text-white/70 text-sm">12%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-subtle p-6 rounded-2xl">
+                    <h4 class="text-white font-semibold mb-4">Blur Levels</h4>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <code class="text-green-300 text-sm">--blur-ultra</code>
+                            <span class="text-white/70 text-sm">40px</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <code class="text-green-300 text-sm">--blur-heavy</code>
+                            <span class="text-white/70 text-sm">25px</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <code class="text-green-300 text-sm">--blur-medium</code>
+                            <span class="text-white/70 text-sm">16px</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-subtle p-6 rounded-2xl">
+                    <h4 class="text-white font-semibold mb-4">Border Radius</h4>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <code class="text-purple-300 text-sm">--radius-3xl</code>
+                            <span class="text-white/70 text-sm">36px</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <code class="text-purple-300 text-sm">--radius-2xl</code>
+                            <span class="text-white/70 text-sm">28px</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <code class="text-purple-300 text-sm">--radius-xl</code>
+                            <span class="text-white/70 text-sm">22px</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-subtle p-6 rounded-2xl">
+                    <h4 class="text-white font-semibold mb-4">Animations</h4>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <code class="text-yellow-300 text-sm">--spring</code>
+                            <span class="text-white/70 text-sm">bounce</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <code class="text-yellow-300 text-sm">--ease-out-expo</code>
+                            <span class="text-white/70 text-sm">smooth</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <code class="text-yellow-300 text-sm">--transition-base</code>
+                            <span class="text-white/70 text-sm">0.3s</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Usage Examples -->
+            <div class="glass-subtle p-6 rounded-2xl">
+                <h4 class="text-white font-semibold mb-4">Usage Examples</h4>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <h5 class="text-white/80 font-medium mb-3">Basic Glass Component</h5>
+                        <pre class="glass-ultra p-4 rounded-xl text-sm overflow-x-auto"><code class="text-green-300">&lt;div class="glass glass-morph glass-hover p-6 rounded-3xl"&gt;
+  &lt;h3 class="text-white"&gt;Glass Card&lt;/h3&gt;
+  &lt;p class="text-white/80"&gt;Content here&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+                    </div>
+                    <div>
+                        <h5 class="text-white/80 font-medium mb-3">Custom CSS Variables</h5>
+                        <pre class="glass-ultra p-4 rounded-xl text-sm overflow-x-auto"><code class="text-blue-300">:root {
+  --glass-white: rgba(255, 255, 255, 0.25);
+  --blur-medium: 16px;
+  --radius-xl: 22px;
+  --spring: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal -->
+    <div class="glass-modal" id="modal">
+        <div class="glass-ultra glass-modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">Glass Modal</h3>
+                <button onclick="closeModal()" class="glass-subtle p-2 rounded-lg glass-hover">
+                    <i class="fas fa-times text-white/80"></i>
+                </button>
+            </div>
+            <p class="text-white/80 mb-6">This is a beautiful glass morphism modal with ultra blur effects and smooth animations. The backdrop blur creates a stunning depth effect.</p>
+            <div class="flex gap-3">
+                <button onclick="closeModal()" class="glass glass-button glass-hover glass-press text-white">
+                    <i class="fas fa-check"></i>
+                    Confirm
+                </button>
+                <button onclick="closeModal()" class="glass-subtle glass-button glass-hover glass-press text-white">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container" class="fixed top-4 right-4 space-y-2 z-50"></div>
+
+    <script>
+        // Tab functionality
+        function switchTab(index) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.glass-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+            
+            // Add active class to clicked tab and show content
+            document.querySelectorAll('.glass-tab')[index].classList.add('active');
+            document.getElementById(`tab-${index}`).style.display = 'block';
+        }
+
+        // Dropdown functionality
+        function toggleDropdown() {
+            const dropdown = document.getElementById('dropdown');
+            const icon = document.getElementById('dropdown-icon');
+            dropdown.classList.toggle('active');
+            icon.style.transform = dropdown.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+
+        // Modal functionality
+        function openModal() {
+            document.getElementById('modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal on backdrop click
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Notification system
+        function showNotification() {
+            const container = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+            notification.className = 'glass glass-morph p-4 rounded-2xl max-w-sm transform translate-x-full transition-transform duration-300';
+            notification.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="glass-subtle p-2 rounded-lg">
+                        <i class="fas fa-bell text-white/80"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-white font-medium">Glass Notification</h4>
+                        <p class="text-white/70 text-sm">Beautiful glass morphism notification with blur effects!</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="glass-subtle p-1 rounded glass-hover">
+                        <i class="fas fa-times text-white/60 text-xs"></i>
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+
+        // Animated progress bar
+        let progressValue = 45;
+        let increasing = true;
+        
+        setInterval(() => {
+            const progressBar = document.getElementById('animated-progress');
+            if (increasing) {
+                progressValue += 2;
+                if (progressValue >= 100) increasing = false;
+            } else {
+                progressValue -= 2;
+                if (progressValue <= 0) increasing = true;
+            }
+            progressBar.style.width = progressValue + '%';
+        }, 100);
+
+        // Mouse tracking for glass morph effect
+        document.addEventListener('mousemove', (e) => {
+            document.querySelectorAll('.glass-morph').forEach(element => {
+                const rect = element.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                element.style.setProperty('--mouse-x', x + '%');
+                element.style.setProperty('--mouse-y', y + '%');
+            });
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('dropdown');
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove('active');
+                document.getElementById('dropdown-icon').style.transform = 'rotate(0deg)';
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                document.getElementById('dropdown').classList.remove('active');
+            }
+        });
+
+        // Enhanced glass effect on scroll
+        let ticking = false;
+        function updateGlassEffects() {
+            const scrollY = window.pageYOffset;
+            document.querySelectorAll('.glass-morph').forEach((element, index) => {
+                const rate = scrollY * -0.5;
+                element.style.transform = `translate3d(0, ${rate * 0.1}px, 0)`;
+            });
+            ticking = false;
+        }
+
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(updateGlassEffects);
+                ticking = true;
+            }
+        });
+
+        // Initialize tooltips
+        document.querySelectorAll('.glass-tooltip').forEach(tooltip => {
+            tooltip.addEventListener('mouseenter', function() {
+                this.querySelector('.glass-tooltip-content').style.opacity = '1';
+                this.querySelector('.glass-tooltip-content').style.visibility = 'visible';
+            });
+            
+            tooltip.addEventListener('mouseleave', function() {
+                this.querySelector('.glass-tooltip-content').style.opacity = '0';
+                this.querySelector('.glass-tooltip-content').style.visibility = 'hidden';
+            });
+        });
+
+        // Performance optimization for glass effects
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('glass-visible');
+                } else {
+                    entry.target.classList.remove('glass-visible');
+                }
+            });
+        });
+
+        document.querySelectorAll('.glass-morph').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

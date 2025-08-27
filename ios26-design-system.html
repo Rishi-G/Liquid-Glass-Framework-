@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS 26 Liquid Glass Design System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            /* Colors */
+            --glass-primary: rgba(255, 255, 255, 0.12);
+            --glass-secondary: rgba(255, 255, 255, 0.08);
+            --glass-tertiary: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-border-light: rgba(255, 255, 255, 0.06);
+            --glass-shadow: rgba(0, 0, 0, 0.25);
+            --glass-glow: rgba(255, 255, 255, 0.05);
+            
+            /* Blur levels */
+            --blur-xs: 4px;
+            --blur-sm: 8px;
+            --blur-md: 12px;
+            --blur-lg: 16px;
+            --blur-xl: 20px;
+            --blur-2xl: 24px;
+            
+            /* Radius */
+            --radius-xs: 8px;
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 20px;
+            --radius-xl: 24px;
+            --radius-2xl: 32px;
+            --radius-full: 50%;
+            
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 12px;
+            --space-lg: 16px;
+            --space-xl: 20px;
+            --space-2xl: 24px;
+            --space-3xl: 32px;
+            --space-4xl: 40px;
+            
+            /* Sizes */
+            --size-xs: 16px;
+            --size-sm: 24px;
+            --size-md: 32px;
+            --size-lg: 40px;
+            --size-xl: 48px;
+            --size-2xl: 56px;
+            --size-3xl: 64px;
+            
+            /* Animation */
+            --transition-fast: 0.15s ease-out;
+            --transition-normal: 0.25s ease-out;
+            --transition-slow: 0.35s ease-out;
+            --spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            
+            /* Glass elevation levels */
+            --shadow-glass-1: 
+                0 4px 16px rgba(0, 0, 0, 0.12),
+                0 1px 4px rgba(255, 255, 255, 0.05) inset;
+            --shadow-glass-2: 
+                0 8px 24px rgba(0, 0, 0, 0.16),
+                0 2px 8px rgba(255, 255, 255, 0.08) inset;
+            --shadow-glass-3: 
+                0 12px 32px rgba(0, 0, 0, 0.20),
+                0 4px 12px rgba(255, 255, 255, 0.10) inset;
+            --shadow-glass-4: 
+                0 16px 40px rgba(0, 0, 0, 0.24),
+                0 8px 16px rgba(255, 255, 255, 0.12) inset;
+        }
+
+        /* SVG Filters for Advanced Glass Effects */
+        .glass-filter {
+            filter: url(#liquid-glass);
+        }
+        
+        .glass-chromatic {
+            filter: url(#chromatic-aberration);
+        }
+
+        /* Base Glass Classes */
+        .glass {
+            background: var(--glass-primary);
+            backdrop-filter: blur(var(--blur-md));
+            -webkit-backdrop-filter: blur(var(--blur-md));
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-glass-2);
+            transition: all var(--transition-normal);
+        }
+
+        .glass-light {
+            background: var(--glass-secondary);
+            backdrop-filter: blur(var(--blur-sm));
+            -webkit-backdrop-filter: blur(var(--blur-sm));
+            border: 1px solid var(--glass-border-light);
+            box-shadow: var(--shadow-glass-1);
+        }
+
+        .glass-heavy {
+            background: var(--glass-primary);
+            backdrop-filter: blur(var(--blur-lg));
+            -webkit-backdrop-filter: blur(var(--blur-lg));
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-glass-3);
+        }
+
+        .glass-ultra {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.18) 0%,
+                rgba(255, 255, 255, 0.12) 50%,
+                rgba(255, 255, 255, 0.08) 100%);
+            backdrop-filter: blur(var(--blur-xl));
+            -webkit-backdrop-filter: blur(var(--blur-xl));
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-glass-4);
+        }
+
+        /* Hover Effects */
+        .glass-hover:hover {
+            background: rgba(255, 255, 255, 0.16);
+            border-color: rgba(255, 255, 255, 0.14);
+            box-shadow: 
+                0 12px 32px rgba(0, 0, 0, 0.18),
+                0 4px 12px rgba(255, 255, 255, 0.12) inset;
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .glass-press:active {
+            transform: translateY(1px) scale(0.98);
+            box-shadow: var(--shadow-glass-1);
+        }
+
+        /* Liquid Animation */
+        .glass-liquid {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-liquid::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(
+                circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0.05) 40%,
+                transparent 70%
+            );
+            pointer-events: none;
+            transition: opacity var(--transition-fast);
+            opacity: 0;
+        }
+
+        .glass-liquid:hover::before {
+            opacity: 1;
+        }
+
+        /* Component Specific Styles */
+        .glass-card {
+            border-radius: var(--radius-lg);
+            padding: var(--space-2xl);
+        }
+
+        .glass-button {
+            border-radius: var(--radius-md);
+            padding: var(--space-md) var(--space-xl);
+            font-weight: 500;
+            transition: all var(--transition-fast) var(--spring);
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .glass-input {
+            border-radius: var(--radius-md);
+            padding: var(--space-md) var(--space-lg);
+            background: var(--glass-secondary);
+            border: 1px solid var(--glass-border-light);
+            backdrop-filter: blur(var(--blur-sm));
+        }
+
+        .glass-input:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 
+                0 0 0 3px rgba(59, 130, 246, 0.1),
+                var(--shadow-glass-2);
+        }
+
+        .glass-modal {
+            backdrop-filter: blur(var(--blur-2xl));
+            -webkit-backdrop-filter: blur(var(--blur-2xl));
+        }
+
+        .glass-dropdown {
+            border-radius: var(--radius-lg);
+            background: var(--glass-primary);
+            backdrop-filter: blur(var(--blur-lg));
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-glass-3);
+        }
+
+        /* Animation Classes */
+        .animate-glass-in {
+            animation: glassIn var(--transition-normal) var(--spring);
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes glassIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-10px) rotate(1deg); }
+            66% { transform: translateY(5px) rotate(-0.5deg); }
+        }
+
+        /* Utility Classes */
+        .radius-xs { border-radius: var(--radius-xs); }
+        .radius-sm { border-radius: var(--radius-sm); }
+        .radius-md { border-radius: var(--radius-md); }
+        .radius-lg { border-radius: var(--radius-lg); }
+        .radius-xl { border-radius: var(--radius-xl); }
+        .radius-2xl { border-radius: var(--radius-2xl); }
+
+        .blur-xs { backdrop-filter: blur(var(--blur-xs)); }
+        .blur-sm { backdrop-filter: blur(var(--blur-sm)); }
+        .blur-md { backdrop-filter: blur(var(--blur-md)); }
+        .blur-lg { backdrop-filter: blur(var(--blur-lg)); }
+        .blur-xl { backdrop-filter: blur(var(--blur-xl)); }
+
+        /* Background */
+        body {
+            background: linear-gradient(135deg, 
+                #667eea 0%, 
+                #764ba2 25%, 
+                #f093fb 50%, 
+                #f5576c 75%, 
+                #4facfe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { 
+            background: var(--glass-border); 
+            border-radius: var(--radius-full); 
+        }
+        ::-webkit-scrollbar-thumb:hover { background: var(--glass-primary); }
+    </style>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        glass: {
+                            primary: 'rgba(255, 255, 255, 0.12)',
+                            secondary: 'rgba(255, 255, 255, 0.08)',
+                            tertiary: 'rgba(255, 255, 255, 0.06)',
+                            border: 'rgba(255, 255, 255, 0.1)',
+                        }
+                    },
+                    backdropBlur: {
+                        'xs': '4px',
+                        'sm': '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="p-8">
+    <!-- SVG Filters -->
+    <svg width="0" height="0" style="position: absolute;">
+        <defs>
+            <!-- Liquid Glass Filter -->
+            <filter id="liquid-glass" x="-50%" y="-50%" width="200%" height="200%">
+                <feTurbulence baseFrequency="0.01 0.02" numOctaves="3" result="noise"/>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" result="displaced"/>
+                <feGaussianBlur in="displaced" stdDeviation="0.5" result="blurred"/>
+                <feComposite in="blurred" in2="SourceGraphic" operator="over"/>
+            </filter>
+            
+            <!-- Chromatic Aberration -->
+            <filter id="chromatic-aberration" x="-10%" y="-10%" width="120%" height="120%">
+                <feOffset in="SourceGraphic" dx="1" dy="0" result="red"/>
+                <feOffset in="SourceGraphic" dx="-1" dy="0" result="blue"/>
+                <feBlend in="red" in2="SourceGraphic" mode="multiply" result="redBlend"/>
+                <feBlend in="blue" in2="redBlend" mode="multiply"/>
+            </filter>
+            
+            <!-- Glow Effect -->
+            <filter id="glow">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge> 
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+            </filter>
+        </defs>
+    </svg>
+
+    <div class="container mx-auto max-w-7xl space-y-8">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-bold text-white mb-4 animate-float">iOS 26 Liquid Glass</h1>
+            <p class="text-xl text-white/80">Advanced Design System & Component Library</p>
+        </header>
+
+        <!-- Color Palette -->
+        <section class="glass glass-card animate-glass-in">
+            <h2 class="text-2xl font-bold text-white mb-6">Color System</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass-light radius-md p-4">
+                    <div class="w-full h-16 bg-white/10 radius-sm mb-3"></div>
+                    <p class="text-white text-sm font-medium">Primary</p>
+                    <code class="text-white/60 text-xs">rgba(255,255,255,0.12)</code>
+                </div>
+                <div class="glass-light radius-md p-4">
+                    <div class="w-full h-16 bg-white/8 radius-sm mb-3"></div>
+                    <p class="text-white text-sm font-medium">Secondary</p>
+                    <code class="text-white/60 text-xs">rgba(255,255,255,0.08)</code>
+                </div>
+                <div class="glass-light radius-md p-4">
+                    <div class="w-full h-16 bg-white/6 radius-sm mb-3"></div>
+                    <p class="text-white text-sm font-medium">Tertiary</p>
+                    <code class="text-white/60 text-xs">rgba(255,255,255,0.06)</code>
+                </div>
+                <div class="glass-light radius-md p-4">
+                    <div class="w-full h-16 bg-white/10 border border-white/10 radius-sm mb-3"></div>
+                    <p class="text-white text-sm font-medium">Border</p>
+                    <code class="text-white/60 text-xs">rgba(255,255,255,0.1)</code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Typography -->
+        <section class="glass glass-card animate-glass-in">
+            <h2 class="text-2xl font-bold text-white mb-6">Typography</h2>
+            <div class="space-y-4">
+                <h1 class="text-4xl font-bold text-white">Heading 1 - Bold Display</h1>
+                <h2 class="text-3xl font-semibold text-white">Heading 2 - Semibold</h2>
+                <h3 class="text-2xl font-medium text-white">Heading 3 - Medium</h3>
+                <p class="text-lg text-white/90">Body Large - Regular paragraph text for important content</p>
+                <p class="text-base text-white/80">Body Medium - Standard paragraph text for general content</p>
+                <p class="text-sm text-white/70">Body Small - Caption and secondary information</p>
+            </div>
+        </section>
+
+        <!-- Glass Variants -->
+        <section class="glass glass-card animate-glass-in">
+            <h2 class="text-2xl font-bold text-white mb-6">Glass Variants</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="glass-light radius-lg p-6">
+                    <h3 class="text-white font-semibold mb-2">Light Glass</h3>
+                    <p class="text-white/70 text-sm mb-4">Subtle transparency for backgrounds</p>
+                    <code class="text-xs text-white/60">.glass-light</code>
+                </div>
+                <div class="glass radius-lg p-6">
+                    <h3 class="text-white font-semibold mb-2">Standard Glass</h3>
+                    <p class="text-white/70 text-sm mb-4">Balanced opacity and blur</p>
+                    <code class="text-xs text-white/60">.glass</code>
+                </div>
+                <div class="glass-heavy radius-lg p-6">
+                    <h3 class="text-white font-semibold mb-2">Heavy Glass</h3>
+                    <p class="text-white/70 text-sm mb-4">Strong blur for overlays</p>
+                    <code class="text-xs text-white/60">.glass-heavy</code>
+                </div>
+                <div class="glass-ultra radius-lg p-6">
+                    <h3 class="text-white font-semibold mb-2">Ultra Glass</h3>
+                    <p class="text-white/70 text-sm mb-4">Maximum blur with gradient</p>
+                    <code class="text-xs text-white/60">.glass-ultra</code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Buttons -->
+        <section class="glass glass-card animate-glass-in">
+            <h2 class="text-2xl font-bold text-white mb-6">Buttons</h2>
+            <div class="flex flex-wrap gap-4">
+                <button class="glass glass-button glass-hover glass-press text-white">
+                    <i class="fas fa-heart"></i>
+                    Primary Button
+                </button>
+                <button class="glass-light glass-button glass-hover glass-press text-white">
+                    <i class="fas fa-star"></i>
+                    Secondary Button
+                </button>
+                <button class="glass-heavy glass-button glass-hover glass-press text-white">
+                    <i class="fas fa-download"></i>
+                    Heavy Button
+                </button>
+                <button class="glass glass-button glass-hover glass-press text-white radius-full px-6">
+                    <i class="fas fa-plus"></i>
+                    Pill Button
+                </button>
+            </div>
+        </section>
+
+        <!-- Form Elements -->
+        <section class="glass glass-card animate-glass-in">
+            <h2 class="text-2xl font-bold text-white mb-6">Form Elements</h2>
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-white font-medium mb-2">Glass Input</label>
+                    <input type="text" placeholder="Enter your text..." class="glass-input text-white placeholder-white/50 w-full">
+                </div>
+                <div>
+                    <label class="block text-white font-medium mb-2">Search Input</label>
+                    <div class="relative">
+                        <input type="text" placeholder="Search..." class="glass-input text-white placeholder-white/50 w-full pl-12">
+                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-white/70"></i>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-white font-medium mb-2">Textarea</label>
+                    <textarea placeholder="Enter your message..." rows="4" class="glass-input text-white placeholder-white/50 w-full resize-none"></textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cards -->
+        <section class="animate-glass-in">
+            <h2 class="text-2xl font-bold text-white mb-6 glass glass-card !p-4">Card Components</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Profile Card -->
+                <div class="glass glass-hover glass-liquid radius-xl p-6 group">
+                    <div class="flex items-center space-x-4 mb-4">
+                        <div class="w-12 h-12 glass radius-full flex items-center justify-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-white font-semibold">Ramesh Sippi</h3>
+                            <p class="text-white/70 text-sm">UI Designer</p>
+                        </div>
+                    </div>
+                    <p class="text-white/80 text-sm mb-4">Creating beautiful glass interfaces with advanced blur effects and liquid animations.</p>
+                    <div class="flex space-x-2">
+                        <button class="glass-light glass-button glass-hover text-white text-sm">
+                            <i class="fas fa-heart"></i>
+                            Follow
+                        </button>
+                        <button class="glass-light glass-button glass-hover text-white text-sm">
+                            <i class="fas fa-message"></i>
+                            Message
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Card -->
+                <div class="glass glass-hover glass-liquid radius-xl p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-white font-semibold">Analytics</h3>
+                        <div class="glass-light radius-md p-2">
+                            <i class="fas fa-chart-line text-white/80"></i>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-white/70">Views</span>
+                            <span class="text-white font-semibold">2.4K</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-white/70">Downloads</span>
+                            <span class="text-white font-semibold">892</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-white/70">Likes</span>
+                            <span class="text-white font-semibold">156</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature Card -->
+                <div class="glass glass-hover glass-liquid radius-xl p-6 md:col-span-2 lg:col-span-1">
+                    <div class="text-center">
+                        <div class="glass radius-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-magic text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-white font-semibold mb-2">Liquid Glass</h3>
+                        <p class="text-white/70 text-sm mb-4">Advanced glassmorphism with SVG filters and fluid animations</p>
+                        <button class="glass-light glass-button glass-hover text-white text-sm">
+                            Learn More
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Components -->
+        <section class="glass glass-card animate-glass-in">
+            <h2 class="text-2xl font-bold text-white mb-6">Interactive Components</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Modal Trigger -->
+                <div>
+                    <h3 class="text-white font-semibold mb-4">Modals</h3>
+                    <button onclick="openModal()" class="glass glass-button glass-hover glass-press text-white">
+                        <i class="fas fa-window-maximize"></i>
+                        Open Modal
+                    </button>
+                </div>
+
+                <!-- Dropdown -->
+                <div>
+                    <h3 class="text-white font-semibold mb-4">Dropdowns</h3>
+                    <div class="relative">
+                        <button onclick="toggleDropdown()" class="glass glass-button glass-hover glass-press text-white">
+                            <i class="fas fa-chevron-down"></i>
+                            Dropdown Menu
+                        </button>
+                        <div id="dropdown" class="glass-dropdown absolute top-full left-0 mt-2 py-2 w-48 opacity-0 invisible transition-all duration-200 z-50">
+                            <a href="#" class="block px-4 py-2 text-white hover:bg-white/10 transition-colors">
+                                <i class="fas fa-home mr-3"></i>Home
+                            </a>
+                            <a href="#" class="block px-4 py-2 text-white hover:bg-white/10 transition-colors">
+                                <i class="fas fa-user mr-3"></i>Profile
+                            </a>
+                            <a href="#" class="block px-4 py-2 text-white hover:bg-white/10 transition-colors">
+                                <i class="fas fa-cog mr-3"></i>Settings
+                            </a>
+                            <hr class="border-white/10 my-2">
+                            <a href="#" class="block px-4 py-2 text-white hover:bg-white/10 transition-colors">
+                                <i class="fas fa-sign-out mr-3"></i>Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation -->
+        <section class="glass glass-card animate-glass-in">
+            <h2 class="text-2xl font-bold text-white mb-6">Navigation</h2>
+            
+            <!-- Tab Navigation -->
+            <div class="mb-8">
+                <h3 class="text-white font-semibold mb-4">Tabs</h3>
+                <div class="glass-light radius-lg p-1 inline-flex">
+                    <button class="glass radius-md px-6 py-2 text-white text-sm font-medium">
+                        Overview
+                    </button>
+                    <button class="px-6 py-2 text-white/70 text-sm font-medium hover:text-white transition-colors">
+                        Analytics
+                    </button>
+                    <button class="px-6 py-2 text-white/70 text-sm font-medium hover:text-white transition-colors">
+                        Settings
+                    </button>
+                </div>
+            </div>
+
+            <!-- Breadcrumbs -->
+            <div class="mb-8">
+                <h3 class="text-white font-semibold mb-4">Breadcrumbs</h3>
+                <nav class="flex items-center space-x-2 text-white/70">
+                    <a href="#" class="hover:text-white transition-colors">Home</a>
+                    <i class="fas fa-chevron-right text-xs"></i>
+                    <a href="#" class="hover:text-white transition-colors">Components</a>
+                    <i class="fas fa-chevron-right text-xs"></i>
+                    <span class="text-white">Navigation</span>
+                </nav>
+            </div>
+
+            <!-- Sidebar Navigation -->
+            <div>
+                <h3 class="text-white font-semibold mb-4">Sidebar Menu</h3>
+                <div class="glass-light radius-lg p-4 max-w-xs">
+                    <nav class="space-y-2">
+                        <a href="#" class="glass radius-md px-4 py-3 text-white flex items-center space-x-3">
+                            <i class="fas fa-home"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="#" class="px-4 py-3 text-white/70 hover:text-white flex items-center space-x-3 transition-colors">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Analytics</span>
+                        </a>
+                        <a href="#" class="px-4 py-3 text-white/70 hover:text-white flex items-center space-x-3 transition-colors">
+                            <i class="fas fa-users"></i>
+                            <span>Team</span>
+                        </a>
+                        <a href="#" class="px-4 py-3 text-white/70 hover:text-white flex items-center space-x-3 transition-colors">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    

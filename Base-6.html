@@ -1,0 +1,349 @@
+<!-- Lovable — Full Liquid-Glass Component Library (Pointer-reactive, chromatic, bubbly)
+Save as lovable-liquid-glass-full.html. Single-file demo with all components and interactive liquid behaviors.
+Notes:
+- Modern browser recommended (Chrome/Safari/Edge).
+- For best results host via local server to allow SVG filters & backdrop-filter performance.
+-->
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lovable — Liquid Glass UI (Full Library)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  /* ===== Design tokens ===== */
+  :root{
+    --bg-1: #0b2340; --bg-2: #07213a;
+    --accent-a: #9fd7ef; --accent-b: #5bb8e6;
+    --glass-blur: 26px;            /* backdrop blur */
+    --glass-radius-xl: 26px;
+    --glass-inner-shadow: rgba(0,0,0,0.18);
+    --glass-border-light: rgba(255,255,255,0.48);
+    --glass-sheen: rgba(255,255,255,0.16);
+    --shadow-deep: 0 30px 80px rgba(0,0,0,0.45);
+    --motion-fast: 160ms; --motion-medium: 320ms; --motion-spring: 600ms;
+
+    /* pointer reactive variables (set by JS) */
+    --mx: 50; --my: 50; /* mouse percentages (0-100) relative to element */
+    --displace-scale: 3; /* displacement filter scale */
+    --bloom: 0.18; /* highlight intensity */
+  }
+  html,body{height:100%;}
+  body{
+    margin:0; font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    background-image: radial-gradient(800px 300px at 10% 10%, rgba(255,255,255,0.02), transparent), linear-gradient(180deg,var(--bg-1),var(--bg-2));
+    -webkit-font-smoothing:antialiased; color:#eaf6ff;
+  }
+
+  /* ===== SVG filters defined in body (see below) ===== */
+
+  /* ===== Liquid surface (core) ===== */
+  .liquid {
+    position: relative; overflow: hidden; border-radius: var(--glass-radius-xl);
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.06);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.2) contrast(1.03);
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.2) contrast(1.03);
+    box-shadow: var(--shadow-deep), inset 0 1px 0 rgba(255,255,255,0.04);
+    transition: transform var(--motion-medium) cubic-bezier(.2,.9,.3,1), box-shadow var(--motion-medium);
+    will-change: transform, box-shadow;
+    transform-origin: center;
+  }
+
+  /* sheen and highlights respond to pointer via CSS variables */
+  .liquid::before{
+    content:''; position:absolute; left:-30%; top:-60%; width:160%; height:120%; transform: rotate(calc((var(--mx) - 50) * 0.03deg));
+    background: radial-gradient(circle at calc(var(--mx)% ) calc(var(--my)% ), rgba(255,255,255,var(--bloom)), rgba(255,255,255,0) 30%);
+    filter: blur(18px); opacity:0.95; pointer-events:none; mix-blend-mode:screen;
+    transition: all 220ms linear;
+  }
+  /* inner shadow / reflection */
+  .liquid::after{
+    content:''; position:absolute; inset:auto 6% -10% 6%; height:40%; background: radial-gradient(ellipse at center, rgba(0,0,0,0.12), transparent 55%); pointer-events:none; transition: opacity 260ms;
+  }
+  .liquid .edge {
+    position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.34), inset 0 -8px 30px rgba(0,0,0,0.14);
+    mix-blend-mode: screen; opacity:0.95;
+  }
+
+  /* apply svg displacement filter for refraction to big surfaces */
+  .liquid-refraction{ filter: url(#glass-dist); }
+
+  /* pointer reactive morph (bubbly) - scaling & slight radius tweak on hover/press */
+  .liquid.interactive{ transition: transform var(--motion-spring) cubic-bezier(.22,.9,.35,1), box-shadow var(--motion-medium);
+    will-change: transform; }
+  .liquid.interactive:hover{ transform: translateY(-6px) scale(1.01); box-shadow: 0 40px 90px rgba(0,0,0,0.55); }
+  .liquid.interactive:active{ transform: translateY(0) scale(.995); }
+
+  /* ===== Search pill specifics ===== */
+  .search-pill{ display:flex; align-items:center; gap:22px; padding:22px 28px; border-radius:9999px; height:96px; }
+  .search-icon{ width:58px;height:58px;border-radius:9999px;display:grid;place-items:center;background:linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.02)); box-shadow: inset 0 2px 6px rgba(255,255,255,0.12); }
+  .search-input{ flex:1; border:none; background:transparent; color: #eaf6ff; font-weight:700; font-size:34px; outline:none; }
+  .filter-circle{ width:98px;height:98px;border-radius:9999px;display:grid;place-items:center; }
+
+  /* ===== UI helpers ===== */
+  .btn{ padding:.56rem 1rem; border-radius:12px; font-weight:700; cursor:pointer; }
+  .btn-primary{ background: linear-gradient(90deg,var(--accent-a),var(--accent-b)); color:#032033; box-shadow: 0 12px 40px rgba(91,184,230,0.12); }
+  .card{ padding:18px; border-radius:14px; }
+
+  /* tooltips/dropdowns/modal layering */
+  .dropdown-panel{ position:absolute; right:0; top:100%; margin-top:14px; width:260px; padding:10px; border-radius:12px; transform-origin:top right; transition: all var(--motion-fast); }
+  .dropdown-panel.hidden{ opacity:0; transform: translateY(-8px) scale(.98); pointer-events:none; }
+  .dropdown-panel.show{ opacity:1; transform: translateY(0) scale(1); pointer-events:auto; z-index:1100; }
+
+  .tooltip{ position:fixed; padding:8px 12px; border-radius:10px; font-size:13px; transition: transform var(--motion-fast), opacity var(--motion-fast); opacity:0; pointer-events:none; background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); box-shadow: 0 8px 30px rgba(0,0,0,0.4); z-index:1200; }
+  .tooltip.show{ opacity:1; transform: translateY(0); pointer-events:auto; }
+
+  .modal-backdrop{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background: rgba(1,6,20,0.65); z-index:1500; }
+  .modal-card{ width:min(960px, 94%); border-radius:20px; }
+
+  /* for performance: reduce heavy effects on small screens */
+  @media (max-width:760px){ :root{ --glass-blur: 16px; } .search-input{ font-size:20px; } }
+
+  /* reduced-motion respects user preferences */
+  @media (prefers-reduced-motion: reduce){ *{ transition:none!important; animation:none!important; } }
+</style>
+</head>
+<body>
+
+<!-- SVG Filters: displacement + chromatic aberration subtle mix -->
+<svg width="0" height="0" style="position:absolute" aria-hidden>
+  <filter id="glass-dist" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.008" numOctaves="1" seed="5" result="noise" />
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G" />
+  </filter>
+  <!-- chromatic split using feColorMatrix for subtle RGB offset (light weight) -->
+  <filter id="chromatic" x="-30%" y="-30%" width="160%" height="160%">
+    <feColorMatrix type="matrix" values="1 0 0 0 0  0 0.98 0 0 0  0 0 0.95 0 0  0 0 0 1 0" result="cm"/>
+    <feOffset dx="-0.4" dy="0.4" in="cm" result="off1"/>
+    <feBlend in="SourceGraphic" in2="off1" mode="screen"/>
+  </filter>
+</svg>
+
+<!-- ========== HEADER with pointer-reactive search pill ========== -->
+<header class="p-8">
+  <div class="max-w-[1200px] mx-auto flex items-center gap-6">
+    <div class="liquid liquid-refraction interactive search-pill" data-interactive>
+      <div class="edge"></div>
+      <div class="search-icon">🔍</div>
+      <input class="search-input" placeholder="Search Here" aria-label="Search" />
+      <div style="width:1px;height:56px;background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.06)); border-radius:2px"></div>
+      <button id="filterBtn" class="filter-circle liquid" aria-label="Filter">⚙️</button>
+    </div>
+  </div>
+</header>
+
+<!-- ========== MAIN: Full component library ========== -->
+<main class="max-w-[1200px] mx-auto px-8 pb-20">
+  <!-- NAVBAR -->
+  <nav class="liquid r-[12px] p-3 flex items-center justify-between mb-8">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-lg liquid center" style="display:grid;place-items:center">LG</div>
+      <div class="text-white font-semibold text-lg">Lovable</div>
+    </div>
+    <div class="flex items-center gap-3 relative">
+      <a class="liquid p-2 px-4 rounded-md" href="#">Home</a>
+      <a class="liquid p-2 px-4 rounded-md" href="#">Features</a>
+      <a class="liquid p-2 px-4 rounded-md" href="#">Pricing</a>
+      <button id="navDropBtn" class="liquid p-2 px-4 rounded-md">More ▾</button>
+      <div id="navDrop" class="dropdown-panel hidden liquid">
+        <div class="edge" style="opacity:.6"></div>
+        <a class="block py-2 px-3 rounded-md" href="#">About</a>
+        <a class="block py-2 px-3 rounded-md" href="#">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- Buttons -->
+      <div class="liquid card">
+        <div class="flex items-center justify-between">
+          <h3 class="text-white text-lg font-semibold">Buttons</h3>
+          <div class="flex gap-2 items-center">
+            <button class="btn btn-primary" data-tooltip="Primary action">Primary</button>
+            <button class="btn" data-tooltip="Ghost">Ghost</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Forms -->
+      <div class="liquid card">
+        <h3 class="text-white font-semibold">Forms</h3>
+        <form id="demoForm" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div><label class="block text-white/70 mb-2">Email</label><input id="email" class="w-full p-3 liquid" placeholder="name@example.com"></div>
+          <div><label class="block text-white/70 mb-2">Password</label><input id="password" class="w-full p-3 liquid" type="password"></div>
+          <div class="md:col-span-2"><label class="block mb-2 text-white/70">Message</label><textarea id="message" rows="3" class="w-full p-3 liquid"></textarea></div>
+          <div class="md:col-span-2 flex items-center gap-3"><button id="submitBtn" type="button" class="btn btn-primary">Submit</button><button type="reset" class="btn">Reset</button><div id="formStatus" class="text-sm text-green-400 hidden">Submitted</div></div>
+        </form>
+      </div>
+
+      <!-- Cards & Table -->
+      <div class="liquid card">
+        <h3 class="text-white font-semibold">Cards / Table</h3>
+        <div class="grid md:grid-cols-3 gap-4 mt-4">
+          <article class="liquid p-4"><h4 class="font-semibold text-white">Card A</h4><p class="text-sm text-white/70">Description A</p></article>
+          <article class="liquid p-4"><h4 class="font-semibold text-white">Card B</h4><p class="text-sm text-white/70">Description B</p></article>
+          <article class="liquid p-4"><h4 class="font-semibold text-white">Card C</h4><p class="text-sm text-white/70">Description C</p></article>
+        </div>
+
+        <div class="mt-6 overflow-x-auto liquid"><table class="lovable-table w-full"><thead><tr><th>#</th><th>Name</th><th>Role</th><th>Status</th></tr></thead><tbody><tr><td>1</td><td>Rudrka</td><td>Creator</td><td style="color:var(--accent-b)">Active</td></tr><tr><td>2</td><td>Alex</td><td>Designer</td><td style="color:var(--glass-inner-shadow)">Offline</td></tr></tbody></table></div>
+      </div>
+
+      <!-- Accordion & Tabs -->
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="liquid card"><h3 class="text-white font-semibold">Accordion</h3><div class="mt-3 space-y-2"><div class="liquid p-2"><button class="w-full text-left p-3 font-semibold accordion" data-target="#a1">What is this?</button><div id="a1" class="panel hidden p-3">Liquid glass UI kit.</div></div><div class="liquid p-2"><button class="w-full text-left p-3 font-semibold accordion" data-target="#a2">Design</button><div id="a2" class="panel hidden p-3">Apple-like morphing glass.</div></div></div></div>
+        <div class="liquid card"><h3 class="text-white font-semibold">Tabs</h3><div class="lovable-tabs flex gap-2 border-b border-white/6"><button class="tab active" data-target="#tab1">Overview</button><button class="tab" data-target="#tab2">Specs</button></div><div id="tab1" class="mt-3">Overview content.</div><div id="tab2" class="mt-3 hidden">Specs content.</div></div>
+      </div>
+
+    </div>
+
+    <!-- Right column -->
+    <aside class="space-y-6">
+      <div class="liquid card"><h4 class="text-white font-semibold">Quick Actions</h4><div class="mt-3 flex flex-col gap-3"><button id="toastBtn" class="btn btn-primary">Show Toast</button><button id="openModalBtn" class="btn">Open Modal</button></div></div>
+      <div class="liquid card"><h4 class="text-white font-semibold">Pagination</h4><div class="mt-3 flex gap-2"><button class="liquid p-2">«</button><button class="liquid p-2" style="background:linear-gradient(90deg,var(--accent-a),var(--accent-b)); color:#032033">1</button><button class="liquid p-2">2</button><button class="liquid p-2">»</button></div></div>
+      <div class="liquid card"><h4 class="text-white font-semibold">Breadcrumbs</h4><div class="mt-3 flex gap-2 items-center"><a class="liquid p-2">Home</a><span class="text-white/60">/</span><a class="liquid p-2">Docs</a></div></div>
+      <div class="liquid card"><h4 class="text-white font-semibold">Toasts</h4><div id="toastRoot"></div></div>
+    </aside>
+
+  </section>
+</main>
+
+<!-- reusable tooltip element -->
+<div id="tooltip" class="tooltip liquid" style="display:none;"></div>
+
+<!-- modal -->
+<div id="modal" class="modal-backdrop" style="display:none;"><div class="modal-card liquid" role="dialog" aria-modal="true" aria-labelledby="mTitle"><div class="edge"></div><div style="padding:22px;"><h3 id="mTitle" style="margin:0 0 10px;color:var(--accent-a);">Modal Title</h3><p style="margin:0 0 18px;color:rgba(255,255,255,0.85)">This modal traps focus and sits above panels.</p><div style="display:flex;justify-content:flex-end;gap:10px"><button id="modalClose" class="btn">Close</button><button id="modalSave" class="btn btn-primary">Save</button></div></div></div></div>
+
+<!-- toast root fixed -->
+<div id="toastRoot" style="position:fixed;right:18px;top:18px;display:flex;flex-direction:column;gap:12px;z-index:2000"></div>
+
+<!-- ===== Interactivity & pointer reactive system ===== -->
+<script>
+  // helper
+  const $ = (s, ctx=document) => ctx.querySelector(s);
+  const $$ = (s, ctx=document) => Array.from(ctx.querySelectorAll(s));
+
+  // pointer-reactive: track mouse position over interactive liquids and set CSS vars
+  function bindPointerReactive(el){
+    // on pointer move, compute relative percent and set CSS variables on element
+    function move(e){
+      const r = el.getBoundingClientRect();
+      const x = Math.max(0, Math.min(r.width, e.clientX - r.left));
+      const y = Math.max(0, Math.min(r.height, e.clientY - r.top));
+      const mx = Math.round(100 * (x / r.width));
+      const my = Math.round(100 * (y / r.height));
+      el.style.setProperty('--mx', mx);
+      el.style.setProperty('--my', my);
+      // adjust displacement scale lightly by proximity
+      const dx = Math.abs(mx - 50); const dy = Math.abs(my - 50);
+      const intensity = Math.min(6, 1 + (dx+dy)/40);
+      document.documentElement.style.setProperty('--displace-scale', intensity);
+      // morphing transform (bubbly) proportional to proximity
+      const tx = (mx - 50) * 0.04; const ty = (my - 50) * 0.03;
+      el.style.transform = `translate3d(${tx}px, ${-ty}px, 0) scale(1.002)`;
+    }
+    function leave(){ el.style.setProperty('--mx', 50); el.style.setProperty('--my', 50); el.style.transform = ''; }
+    el.addEventListener('pointermove', move);
+    el.addEventListener('pointerenter', move);
+    el.addEventListener('pointerleave', leave);
+    // click ripple like morphological change
+    el.addEventListener('pointerdown', ()=>{ el.animate([{transform: el.style.transform+' scale(0.995)'},{transform: el.style.transform}], {duration:160, easing:'cubic-bezier(.2,.9,.3,1)'}); });
+  }
+
+  // apply to all interactive liquids
+  $$('.interactive').forEach(bindPointerReactive);
+
+  // also apply to larger surfaces for refraction
+  $$('.liquid-refraction').forEach(bindPointerReactive);
+
+  /* ========== Dropdown nav ========== */
+  (function(){
+    const btn = $('#navDropBtn'), panel = $('#navDrop');
+    if(!btn || !panel) return;
+    btn.addEventListener('click', e=>{ e.stopPropagation(); panel.classList.toggle('hidden'); panel.classList.toggle('show'); });
+    document.addEventListener('click', e=>{ if(!btn.contains(e.target) && !panel.contains(e.target)){ panel.classList.add('hidden'); panel.classList.remove('show'); } });
+  })();
+
+  /* ========== Tooltip wiring ========== */
+  (function(){
+    const tt = $('#tooltip');
+    function show(t, text){
+      tt.textContent = text; tt.style.display = 'block'; tt.classList.add('show');
+      const r = t.getBoundingClientRect(); const ttr = tt.getBoundingClientRect();
+      let left = r.left + r.width/2 - ttr.width/2; if(left < 8) left = 8; if(left + ttr.width > window.innerWidth - 8) left = window.innerWidth - 8 - ttr.width;
+      tt.style.left = left + 'px'; tt.style.top = (r.top - ttr.height - 12) + 'px';
+    }
+    function hide(){ tt.classList.remove('show'); setTimeout(()=> tt.style.display = 'none', 180); }
+    document.addEventListener('pointerover', e=>{ const el = e.target.closest('[data-tooltip]'); if(el) show(el, el.dataset.tooltip); });
+    document.addEventListener('pointerout', e=>{ const el = e.target.closest('[data-tooltip]'); if(el) hide(); });
+  })();
+
+  /* ========== Modal: trap focus + layering ========== */
+  (function(){
+    const openBtns = $$('#openModalBtn');
+    const modal = $('#modal'); const close = $('#modalClose'); const save = $('#modalSave');
+    function trap(container){ const focusables = Array.from(container.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')).filter(n=>!n.disabled); if(!focusables.length) return; let idx=0; focusables[0].focus(); container._key = e=>{ if(e.key==='Tab'){ e.preventDefault(); idx = (idx + (e.shiftKey?-1:1) + focusables.length) % focusables.length; focusables[idx].focus(); } if(e.key==='Escape') closeModal(); }; document.addEventListener('keydown', container._key); }
+    function untrap(container){ if(container._key) document.removeEventListener('keydown', container._key); }
+    function openModal(){ modal.style.display = 'flex'; document.body.style.overflow='hidden'; trap(modal); }
+    function closeModal(){ modal.style.display = 'none'; document.body.style.overflow=''; untrap(modal); }
+    openBtns.forEach(b=>b.addEventListener('click', openModal)); if(close) close.addEventListener('click', closeModal); if(save) save.addEventListener('click', ()=>{ alert('Saved'); closeModal(); }); modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
+  })();
+
+  /* ========== Toasts ========== */
+  (function(){
+    const root = document.getElementById('toastRoot'); const btn = $('#toastBtn');
+    function show(text, time=3000){ const el = document.createElement('div'); el.className='liquid p-3'; el.style.minWidth='220px'; el.textContent=text; root.appendChild(el); setTimeout(()=>{ el.style.transition='opacity 260ms, transform 260ms'; el.style.opacity='0'; el.style.transform='translateX(10px)'; setTimeout(()=>el.remove(),300); }, time); }
+    btn?.addEventListener('click', ()=> show('Demo saved'));
+    window.showToast = show;
+  })();
+
+  /* ========== Accordion + Tabs ========== */
+  (function(){
+    $$('.accordion').forEach(btn=>{ const p = document.querySelector(btn.dataset.target); btn.addEventListener('click', ()=>{ if(!p) return; p.classList.toggle('hidden'); p.style.maxHeight = p.classList.contains('hidden') ? null : p.scrollHeight + 'px'; }); });
+    $$('.tab').forEach(t=> t.addEventListener('click', ()=>{ $$('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active'); $$("[id^='tab']").forEach(x=>x.classList.add('hidden')); const tgt=document.querySelector(t.dataset.target); if(tgt) tgt.classList.remove('hidden'); }));
+  })();
+
+  /* ========== Form demo ========== */
+  (function(){ const s=document.getElementById('submitBtn'); s?.addEventListener('click', ()=>{ const email=document.getElementById('email'); const pass=document.getElementById('password'); const status=document.getElementById('formStatus'); if(!email.value||!pass.value){ alert('Please fill fields'); return;} status.classList.remove('hidden'); setTimeout(()=>status.classList.add('hidden'),2000); }); })();
+
+  /* ===== z-index adjustments (ensure tooltip above panels, modal above all) ===== */
+  (function(){ $('#tooltip').style.zIndex = 99999; $('#modal')?.style.setProperty('z-index', 15000); })();
+
+  /* Ensure dropdowns close on escape */
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ $$('.dropdown-panel').forEach(p=>{ p.classList.add('hidden'); p.classList.remove('show'); }); $('#modal') && ($('#modal').style.display = 'none'); } });
+
+  /* Bind more interactive liquids (by attribute) */
+  $$("[data-interactive]").forEach(bindPointerReactive);
+
+  // ensure global css var influenced by displacement scale
+  const styleRoot = document.documentElement;
+  setInterval(()=>{ // gentle sync: map --displace-scale to FE displacement via attribute
+    const scale = Math.max(1, parseFloat(getComputedStyle(styleRoot).getPropertyValue('--displace-scale')) || 2);
+    // adjust FE displacement by manipulating filter's feDisplacementMap scale via DOM
+    const fe = document.querySelector('filter#glass-dist feDisplacementMap'); if(fe) fe.setAttribute('scale', scale.toString());
+  }, 120);
+
+  // initial binding for any dynamically added interactive
+  function bindPointerReactive(el){
+    el.setAttribute('data-interactive-bound','');
+    function onMove(e){
+      const r = el.getBoundingClientRect(); const x = Math.max(0, Math.min(r.width, e.clientX - r.left)); const y = Math.max(0, Math.min(r.height, e.clientY - r.top));
+      const mx = Math.round(100*(x/r.width)); const my = Math.round(100*(y/r.height));
+      el.style.setProperty('--mx', mx); el.style.setProperty('--my', my);
+      // increase bloom near pointer;
+      const dx = Math.abs(mx-50), dy = Math.abs(my-50); const intensity = Math.min(0.36, 0.06 + (dx+dy)/240);
+      el.style.setProperty('--bloom', intensity);
+    }
+    function onLeave(){ el.style.setProperty('--mx',50); el.style.setProperty('--my',50); el.style.setProperty('--bloom',0.12); }
+    el.addEventListener('pointermove', onMove); el.addEventListener('pointerenter', onMove); el.addEventListener('pointerleave', onLeave);
+    el.addEventListener('pointerdown', ()=>{ el.animate([{transform:'scale(.996)'},{transform:'scale(1)'}],{duration:200,easing:'cubic-bezier(.2,.9,.3,1)'}); });
+  }
+
+</script>
+</body>
+</html>

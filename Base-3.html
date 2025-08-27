@@ -1,0 +1,159 @@
+<!-- Tailwind Glassmorphic Bootstrap-like Components: Batch 1–4 with Variables -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tailwind Glass UI - Extended</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --glass-bg: rgba(255, 255, 255, 0.2);
+      --glass-border: rgba(255, 255, 255, 0.3);
+      --glass-blur: 14px;
+
+      --color-primary: #5bb8e6;
+      --color-success: #22c55e;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      --color-info: #3b82f6;
+      --color-dark: #1f2937;
+
+      --radius-sm: 0.375rem;
+      --radius-md: 0.75rem;
+      --radius-xl: 1.25rem;
+      --radius-2xl: 1.75rem;
+
+      --shadow-glass: 0 8px 30px rgba(12,20,30,0.12);
+    }
+
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--glass-blur)) saturate(1.1);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.1);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-glass);
+    }
+    .btn {
+      @apply px-4 py-2;
+      border-radius: var(--radius-xl);
+    }
+    .btn-primary { background: linear-gradient(to bottom right, #9fd7ef, var(--color-primary)); color:white; }
+    .btn-secondary { color: var(--color-info); }
+    .btn-danger { color: var(--color-danger); }
+    .btn-success { color: var(--color-success); }
+    .btn-warning { color: var(--color-warning); }
+    .btn-dark { color: var(--color-dark); }
+
+    .alert { padding: 1rem; border-radius: var(--radius-xl); }
+    .alert-info { color: var(--color-info); }
+    .alert-success { color: var(--color-success); }
+    .alert-warning { color: var(--color-warning); }
+    .alert-danger { color: var(--color-danger); }
+
+    .input { @apply w-full px-4 py-2; border-radius: var(--radius-md); }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-[#f7fbfd] to-[#dff0f8] p-6 space-y-12">
+
+  <!-- NAVBAR (Batch 1) -->
+  <nav class="glass p-3 rounded-2xl flex items-center justify-between max-w-6xl mx-auto">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-bold">LG</div>
+      <span class="font-semibold">GlassUI</span>
+    </div>
+    <div class="flex items-center gap-4 relative">
+      <a href="#" class="glass px-4 py-2 rounded-xl">Home</a>
+      <a href="#" class="glass px-4 py-2 rounded-xl">Features</a>
+      <a href="#" class="glass px-4 py-2 rounded-xl">Pricing</a>
+      <button id="dropdownBtn" class="glass px-4 py-2 rounded-xl">More ▾</button>
+      <div id="dropdownMenu" class="hidden absolute mt-12 right-0 glass rounded-xl w-40 p-2 flex flex-col space-y-2">
+        <a href="#" class="glass px-3 py-2 rounded-lg">About</a>
+        <a href="#" class="glass px-3 py-2 rounded-lg">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- BUTTONS, ALERTS, CARDS (Batch 1) -->
+  ... [existing code for buttons, alerts, cards, forms, tables, grid, pagination, breadcrumbs remains here] ...
+
+  <!-- MODAL (Batch 4) -->
+  <section class="max-w-6xl mx-auto">
+    <h2 class="text-xl font-semibold mb-4">Modal</h2>
+    <button id="openModal" class="glass btn btn-primary">Open Modal</button>
+    <div id="modal" class="hidden fixed inset-0 flex items-center justify-center bg-black/40">
+      <div class="glass p-6 rounded-2xl max-w-md w-full">
+        <h3 class="text-lg font-bold mb-2">Modal Title</h3>
+        <p class="mb-4">This is a glassmorphic modal example.</p>
+        <button id="closeModal" class="glass btn btn-danger">Close</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOOLTIP (Batch 4) -->
+  <section class="max-w-6xl mx-auto">
+    <h2 class="text-xl font-semibold mb-4">Tooltip</h2>
+    <div class="relative inline-block">
+      <button class="glass btn btn-info" id="tooltipBtn">Hover me</button>
+      <span id="tooltip" class="hidden absolute bottom-full mb-2 left-1/2 -translate-x-1/2 glass px-3 py-1 rounded-xl text-sm">Tooltip text</span>
+    </div>
+  </section>
+
+  <!-- PROGRESS BAR -->
+  <section class="max-w-6xl mx-auto">
+    <h2 class="text-xl font-semibold mb-4">Progress</h2>
+    <div class="glass w-full rounded-xl h-6">
+      <div class="h-6 rounded-xl" style="width:70%; background: var(--color-success);"></div>
+    </div>
+  </section>
+
+  <!-- ACCORDION (Collapse) -->
+  <section class="max-w-6xl mx-auto">
+    <h2 class="text-xl font-semibold mb-4">Accordion</h2>
+    <div class="space-y-2">
+      <div class="glass rounded-xl">
+        <button class="w-full text-left p-3 font-semibold" onclick="toggleCollapse('c1')">Accordion 1</button>
+        <div id="c1" class="hidden p-3">Content for accordion 1.</div>
+      </div>
+      <div class="glass rounded-xl">
+        <button class="w-full text-left p-3 font-semibold" onclick="toggleCollapse('c2')">Accordion 2</button>
+        <div id="c2" class="hidden p-3">Content for accordion 2.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NAVBAR VARIANTS -->
+  <section class="max-w-6xl mx-auto space-y-4">
+    <h2 class="text-xl font-semibold">Navbar Variants</h2>
+    <nav class="glass p-3 rounded-2xl sticky top-0 flex justify-between">Sticky Navbar</nav>
+    <nav class="p-3 rounded-2xl flex justify-center bg-transparent">Transparent Centered Navbar</nav>
+  </section>
+
+  <script>
+    // Dropdown logic
+    const dropdownBtn = document.getElementById('dropdownBtn');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    dropdownBtn.addEventListener('click', () => dropdownMenu.classList.toggle('hidden'));
+    document.addEventListener('click', (e) => {
+      if (!dropdownBtn.contains(e.target) && !dropdownMenu.contains(e.target)) dropdownMenu.classList.add('hidden');
+    });
+
+    // Modal logic
+    const modal = document.getElementById('modal');
+    document.getElementById('openModal').onclick = () => modal.classList.remove('hidden');
+    document.getElementById('closeModal').onclick = () => modal.classList.add('hidden');
+
+    // Tooltip logic
+    const tooltipBtn = document.getElementById('tooltipBtn');
+    const tooltip = document.getElementById('tooltip');
+    tooltipBtn.addEventListener('mouseenter', () => tooltip.classList.remove('hidden'));
+    tooltipBtn.addEventListener('mouseleave', () => tooltip.classList.add('hidden'));
+
+    // Accordion logic
+    function toggleCollapse(id) {
+      const el = document.getElementById(id);
+      el.classList.toggle('hidden');
+    }
+  </script>
+</body>
+</html>

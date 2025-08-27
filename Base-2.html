@@ -1,0 +1,228 @@
+<!-- Tailwind Glassmorphic Bootstrap-like Components: Batch 1 + 2 + 3 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tailwind Glass UI - Variables + Batch 3</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --glass-bg: rgba(255, 255, 255, 0.2);
+      --glass-border: rgba(255, 255, 255, 0.3);
+      --glass-blur: 14px;
+
+      --color-primary: #5bb8e6;
+      --color-success: #22c55e;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      --color-info: #3b82f6;
+      --color-dark: #1f2937;
+
+      --radius-sm: 0.375rem;
+      --radius-md: 0.75rem;
+      --radius-xl: 1.25rem;
+      --radius-2xl: 1.75rem;
+
+      --shadow-glass: 0 8px 30px rgba(12,20,30,0.12);
+    }
+
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--glass-blur)) saturate(1.1);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.1);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-glass);
+    }
+    .btn { @apply px-4 py-2; border-radius: var(--radius-xl); }
+    .btn-primary { background: linear-gradient(to bottom right, #9fd7ef, var(--color-primary)); color: white; box-shadow: 0 6px 30px rgba(91,184,230,0.14); }
+    .btn-secondary { color: var(--color-info); }
+    .btn-danger { color: var(--color-danger); }
+    .btn-success { color: var(--color-success); }
+    .btn-warning { color: var(--color-warning); }
+    .btn-dark { color: var(--color-dark); }
+
+    .alert { padding: 1rem; border-radius: var(--radius-xl); }
+    .alert-info { color: var(--color-info); }
+    .alert-success { color: var(--color-success); }
+    .alert-warning { color: var(--color-warning); }
+    .alert-danger { color: var(--color-danger); }
+
+    .input { @apply w-full px-4 py-2; border-radius: var(--radius-md); }
+
+    .pagination a { @apply px-3 py-1; border-radius: var(--radius-md); }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-[#f7fbfd] to-[#dff0f8] p-6 space-y-12">
+
+  <!-- NAVBAR -->
+  <nav class="glass p-3 rounded-2xl flex items-center justify-between max-w-6xl mx-auto">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-bold">LG</div>
+      <span class="font-semibold">GlassUI</span>
+    </div>
+    <div class="flex items-center gap-4 relative">
+      <a href="#" class="glass px-4 py-2 rounded-xl">Home</a>
+      <a href="#" class="glass px-4 py-2 rounded-xl">Features</a>
+      <a href="#" class="glass px-4 py-2 rounded-xl">Pricing</a>
+      <button id="dropdownBtn" class="glass px-4 py-2 rounded-xl">More ▾</button>
+      <div id="dropdownMenu" class="hidden absolute mt-12 right-0 glass rounded-xl w-40 p-2 flex flex-col space-y-2">
+        <a href="#" class="glass px-3 py-2 rounded-lg">About</a>
+        <a href="#" class="glass px-3 py-2 rounded-lg">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- BUTTONS -->
+  <section class="max-w-6xl mx-auto">
+    <h2 class="text-xl font-semibold mb-4">Buttons</h2>
+    <div class="flex flex-wrap gap-4">
+      <button class="glass btn btn-primary">Primary</button>
+      <button class="glass btn btn-secondary">Secondary</button>
+      <button class="glass btn btn-danger">Danger</button>
+      <button class="glass btn btn-success">Success</button>
+      <button class="glass btn btn-warning">Warning</button>
+      <button class="glass btn btn-dark">Dark</button>
+      <button disabled class="glass btn text-gray-400 cursor-not-allowed opacity-60">Disabled</button>
+      <button class="glass px-3 py-1 text-sm rounded-lg">Small</button>
+      <button class="glass px-6 py-3 text-lg rounded-2xl">Large</button>
+    </div>
+  </section>
+
+  <!-- ALERTS -->
+  <section class="max-w-6xl mx-auto">
+    <h2 class="text-xl font-semibold mb-4">Alerts</h2>
+    <div class="space-y-3">
+      <div class="glass alert alert-info">Info alert: This is a glass info alert!</div>
+      <div class="glass alert alert-success">Success alert: Your action was successful!</div>
+      <div class="glass alert alert-warning">Warning alert: Please check your input.</div>
+      <div class="glass alert alert-danger">Danger alert: Something went wrong!</div>
+    </div>
+  </section>
+
+  <!-- CARDS -->
+  <section class="max-w-6xl mx-auto">
+    <h2 class="text-xl font-semibold mb-4">Cards</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="glass p-6 rounded-2xl">
+        <h3 class="text-lg font-semibold mb-2">Card Title</h3>
+        <p class="text-sm mb-4">This is an example card with Tailwind glassmorphism effect.</p>
+        <button class="glass btn btn-primary">Go somewhere</button>
+      </div>
+      <div class="glass p-6 rounded-2xl">
+        <h3 class="text-lg font-semibold mb-2">Another Card</h3>
+        <p class="text-sm mb-4">Cards can hold text, buttons, and other UI elements.</p>
+        <button class="glass btn btn-secondary">Learn more</button>
+      </div>
+      <div class="glass p-6 rounded-2xl">
+        <h3 class="text-lg font-semibold mb-2">Card 3</h3>
+        <p class="text-sm mb-4">This one has a different button variant.</p>
+        <button class="glass btn btn-danger">Cancel</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORMS -->
+  <section class="max-w-6xl mx-auto">
+    <h2 class="text-xl font-semibold mb-4">Forms</h2>
+    <form class="glass p-6 rounded-2xl space-y-4">
+      <div>
+        <label>Email</label>
+        <input type="email" class="glass input" placeholder="Enter email">
+      </div>
+      <div>
+        <label>Password</label>
+        <input type="password" class="glass input" placeholder="Enter password">
+      </div>
+      <div>
+        <label>Select</label>
+        <select class="glass input">
+          <option>Option 1</option>
+          <option>Option 2</option>
+        </select>
+      </div>
+      <div class="flex gap-4">
+        <label class="flex items-center gap-2"><input type="checkbox"> Check me</label>
+        <label class="flex items-center gap-2"><input type="radio" name="r"> Radio</label>
+      </div>
+      <button class="glass btn btn-primary">Submit</button>
+    </form>
+  </section>
+
+  <!-- TABLES -->
+  <section class="max-w-6xl mx-auto">
+    <h2 class="text-xl font-semibold mb-4">Tables</h2>
+    <div class="overflow-x-auto glass rounded-2xl">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-white/10">
+            <th class="p-3">#</th>
+            <th class="p-3">Name</th>
+            <th class="p-3">Email</th>
+            <th class="p-3">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-t border-white/20">
+            <td class="p-3">1</td>
+            <td class="p-3">Alice</td>
+            <td class="p-3">alice@example.com</td>
+            <td class="p-3 text-green-500">Active</td>
+          </tr>
+          <tr class="border-t border-white/20">
+            <td class="p-3">2</td>
+            <td class="p-3">Bob</td>
+            <td class="p-3">bob@example.com</td>
+            <td class="p-3 text-red-500">Inactive</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- GRID SYSTEM -->
+  <section class="max-w-6xl mx-auto">
+    <h2 class="text-xl font-semibold mb-4">Grid System</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="glass p-6 rounded-2xl">Column 1</div>
+      <div class="glass p-6 rounded-2xl">Column 2</div>
+      <div class="glass p-6 rounded-2xl">Column 3</div>
+      <div class="glass p-6 rounded-2xl">Column 4</div>
+    </div>
+  </section>
+
+  <!-- PAGINATION -->
+  <section class="max-w-6xl mx-auto">
+    <h2 class="text-xl font-semibold mb-4">Pagination</h2>
+    <div class="flex space-x-2 pagination">
+      <a href="#" class="glass">«</a>
+      <a href="#" class="glass bg-[var(--color-primary)] text-white">1</a>
+      <a href="#" class="glass">2</a>
+      <a href="#" class="glass">3</a>
+      <a href="#" class="glass">»</a>
+    </div>
+  </section>
+
+  <!-- BREADCRUMBS -->
+  <section class="max-w-6xl mx-auto">
+    <h2 class="text-xl font-semibold mb-4">Breadcrumbs</h2>
+    <nav class="flex space-x-2">
+      <a href="#" class="glass px-3 py-1 rounded-md">Home</a>
+      <span>/</span>
+      <a href="#" class="glass px-3 py-1 rounded-md">Library</a>
+      <span>/</span>
+      <span class="glass px-3 py-1 rounded-md">Data</span>
+    </nav>
+  </section>
+
+  <script>
+    // Dropdown logic
+    const dropdownBtn = document.getElementById('dropdownBtn');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    dropdownBtn.addEventListener('click', () => dropdownMenu.classList.toggle('hidden'));
+    document.addEventListener('click', (e) => {
+      if (!dropdownBtn.contains(e.target) && !dropdownMenu.contains(e.target)) dropdownMenu.classList.add('hidden');
+    });
+  </script>
+</body>
+</html>
